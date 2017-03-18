@@ -5,7 +5,7 @@ Satellite-monitoring contains simple Ansible playbooks that can be used to perfo
             - cpu, Memory, Disk, Network, Turbostat, Numa, IRQ, Load time
        *Satellite processes Memory, cpu, pagefaults, IOPS, IO throuhput*
             - Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
-       * Satellite Database Operations
+       * Satellite Database Operations*
             - Foreman, Candlepin
 
 ## Getting Started
@@ -42,13 +42,12 @@ Ideally, you need Three hosts to run this project:
    ```console
      # yum install -y ansible
    ```
-3. Create an inventory file named `inventory` (by copying `ansible/inventory.sample`) and update it as necessary:
+3. Create an inventory file named `inventory` (by copying `ansible/inventory.sample`) and update satellite, capsule, grafana, graphite it as necessary:
 
   ```console
     # cp conf/hosts.ini.sample conf/hosts.ini
   ```
 
-    Update satellite, capsule, Monitorng server where grafana 
 # To run with raw ansible-playbook commands on commandline
 
 ###  To install Collectd on satellite & capsules:
