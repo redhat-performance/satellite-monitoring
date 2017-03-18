@@ -1,10 +1,10 @@
 [satellite]
 satellite.example.com
 [capsules]
-capsule1.example.com
-capsule2.example.com
+#capsule1.example.com
+#capsule2.example.com
 [graphite]
-monitoring.example.com
+#monitoring.example.com
 [grafana]
-monitoring.example.com
+#monitoring.example.com
 
