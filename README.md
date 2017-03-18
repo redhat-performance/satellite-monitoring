@@ -1,12 +1,12 @@
 # Satellite-Monitoring
 Satellite-monitoring contains simple Ansible playbooks that can be used to perform following tasks:
-* Monitor Satellite & Capsule Details:
+* Monitor Satellite & Capsule Details
        - System Resources
-             - cpu, Memory, Disk, Network, Turbostat, Numa, IRQ, Load time
+             cpu, Memory, Disk, Network, Turbostat, Numa, IRQ, Load time
        - Satellite processes Memory, cpu, pagefaults, IOPS, IO throuhput
-             - Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
+             Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
        - Satellite Database Operations
-             - Foreman, Candlepin
+             Foreman, Candlepin
 
 ## Getting Started
 Ideally, you need Three hosts to run this project:
