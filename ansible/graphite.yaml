@@ -1,0 +1,15 @@
+---
+#
+# Playbook to install graphite-web
+#
+
+- hosts: graphite
+  remote_user: root
+  ###gather_facts: no
+  vars_files:
+    - ../../conf/satmon.yaml
+  roles:
+    - role: ../satellite/roles/rhsm
+      when:
+        - offline_install is undefined
+    - { role: graphite }

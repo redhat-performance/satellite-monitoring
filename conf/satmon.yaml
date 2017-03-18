@@ -1,0 +1,5 @@
+---
+# satperf project settings
+satperf_hosts: conf/hosts.ini
+offline_install: false
+...
