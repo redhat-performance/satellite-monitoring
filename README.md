@@ -1,12 +1,12 @@
 # Satellite-Monitoring
 Satellite-monitoring contains simple Ansible playbooks that can be used to perform following tasks:
-* Monitor Satellite & Capsule Details
-       - System Resources
-             cpu, Memory, Disk, Network, Turbostat, Numa, IRQ, Load time
-       - Satellite processes Memory, cpu, pagefaults, IOPS, IO throuhput
-             Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
-       - Satellite Database Operations
-             Foreman, Candlepin
+### Monitor Satellite & Capsule Details
+       *System Resources*
+            - cpu, Memory, Disk, Network, Turbostat, Numa, IRQ, Load time
+       *Satellite processes Memory, cpu, pagefaults, IOPS, IO throuhput*
+            - Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
+       * Satellite Database Operations
+            - Foreman, Candlepin
 
 ## Getting Started
 Ideally, you need Three hosts to run this project:
@@ -72,7 +72,7 @@ $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/graphite.
 ```
 
 
-### To install collectd->graphite dashboards:
+### To build graphite dashboards:
 
 ```
 $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/dashboards-generic.yaml
