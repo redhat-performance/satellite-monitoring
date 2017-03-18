@@ -1,12 +1,12 @@
 # Satellite-Monitoring
 Satellite-monitoring contains simple Ansible playbooks that can be used to perform following tasks:
-* Monitor Satellite & Capsule Details
-       - System Resources
-          cpu, Memory, Disk, Network, Turbostat, Numa, IRQ, Load time
-       - Satellite processes Memory, cpu, pagefaults, IOPS, IO throuhput
-          Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
-       - Satellite Database Operations
-          Foreman, Candlepin
+* Monitor Satellite & Capsule Details:
+       * System Resources
+             - cpu, Memory, Disk, Network, Turbostat, Numa, IRQ, Load time
+       * Satellite processes Memory, cpu, pagefaults, IOPS, IO throuhput
+             - Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
+       * Satellite Database Operations
+             - Foreman, Candlepin
 
 ## Getting Started
 Ideally, you need Three hosts to run this project:
@@ -56,7 +56,21 @@ Ideally, you need Three hosts to run this project:
 ```
 $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansbile/collectd-generic.yaml --tags "satellite6"
 ```
-...Replace "satellite6" with whatever machines you intend to install collectd on.
+
+```
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansbile/collectd-generic.yaml --tags "capsules"
+```
+
+### To install graphite server, grafana on Monitoring server:
+
+```
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/grafana.yaml --tags "grafana"
+```
+
+```
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/graphite.yaml --tags "graphite"
+```
+
 
 ### To install collectd->graphite dashboards:
 
