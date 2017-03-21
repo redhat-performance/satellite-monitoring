@@ -12,7 +12,7 @@ Satellite-monitoring contains simple Ansible playbooks that can be used to perfo
 Ideally, you need Three hosts to run this project:
 
 1. Ansible Control node (referred to as `Control node` in the rest of this document) is the host from which satellite-monitoring ansible playbooks are run. Could be user laptop
-2. Destination node - Ansbile playbooks install collectd on below nodes 
+2. Destination node - Ansible playbooks install collectd on below nodes 
     - A Satellite server
     - Capsule servers
 3. Monitoring server - Ansible playbooks install below services 
@@ -53,11 +53,11 @@ Ideally, you need Three hosts to run this project:
 ###  To install Collectd on satellite & capsules:
 
 ```
-$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansbile/collectd-generic.yaml --tags "satellite6"
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/collectd-generic.yaml --tags "satellite6"
 ```
 
 ```
-$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansbile/collectd-generic.yaml --tags "capsules"
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/collectd-generic.yaml --tags "capsules"
 ```
 
 ### To install graphite server, grafana on Monitoring server:
