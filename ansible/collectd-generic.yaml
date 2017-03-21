@@ -13,7 +13,7 @@
   vars:
     config_type: graphite
   vars_files:
-    - ../../conf/satmon.yaml
+    - ../conf/satmon.yaml
   roles:
     - collectd-generic
   tags: graphite
@@ -23,7 +23,7 @@
   vars:
     config_type: satellite6
   vars_files:
-    - ../../conf/satmon.yaml
+    - ../conf/satmon.yaml
   roles:
     - collectd-generic
   tags: satellite6
@@ -33,7 +33,7 @@
   vars:
     config_type: capsules
   vars_files:
-    - ../../conf/satmon.yaml
+    - ../conf/satmon.yaml
   roles:
     - collectd-generic
   tags: capsules

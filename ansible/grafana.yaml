@@ -7,7 +7,7 @@
   remote_user: root
   ###gather_facts: no
   vars_files:
-    - ../../conf/satmon.yaml
+    - ../conf/satmon.yaml
   roles:
     - role: ../satellite/roles/rhsm
       when:
