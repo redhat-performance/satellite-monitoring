@@ -47,6 +47,12 @@
   with_items: "{{collectd_packages[config_type]}}"
   register: install_collectd
 
+#create /etc/httpd/conf.d if not exist
+- file:
+    path: /etc/httpd/conf.d
+    state: directory
+    mode: 0755
+
 #
 # Enable mod_status
 #
