@@ -1,8 +1,11 @@
 # Installed by Satellite Ansible Installer
 # Config type: {{config_type}}
 
+#Extract the candlepin password
+{% set candlepin_password = satellite_candlepin_password.stdout.split('=') %}
+
 # Interval default is 10s
-Interval {{collectd_interval}}
+Interval {{collectd_interval|default('10')}}
 
 # Hostname for this machine, if not defined, use gethostname(2) system call
 Hostname "{{inventory_hostname}}"
@@ -86,7 +89,7 @@ LoadPlugin apache
     Host "localhost"
     Port "5432"
     User "foreman"
-    Password "{{satellite_foreman_password.stdout}}"
+    Password "{{ candlepin_password }}"
     # Predefined:
     Query backends
     Query transactions
