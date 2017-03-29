@@ -1,6 +1,23 @@
 ---
 # satperf project settings
 satperf_hosts: conf/hosts.ini
-offline_install: false
+
+#Enable offline install if you want to go for that
+#offline_install: true
+
+#Graphite Settings
 graphite_prefix: satellite62
+graphite_port: 10009
+graphite_username: testgraphite
+graphite_password: tested12345
+
+#Grafana Settings
+grafana_username: testgrafana
+grafana_password: tested12345
+grafana_port: 11202
+
+#RHSM Settings
+rhsm_user: <your rhsm username>
+rhsm_pass: <your_rhsm_password>
+rhsm_pool: 'Pool you want to attach to'
 ...
