@@ -16,6 +16,16 @@
   ignore_errors: true
   register: epel_installed
 
+- name: Get EPEL repo if not already there
+  get_url:
+    url: http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
+    dest: /root/epel-release.rpm
+  when: epel_installed.rc != 0
+
+- name: Install EPEL rpm if not already done
+  shell: rpm -ivh --force /root/epel-release.rpm
+  when: epel_installed.rc != 0
+
 # TODO: to use this method, check for presence of epel.repo first
 # - name: Enable EPEL Repo
 #   ini_file: dest=/etc/yum.repos.d/epel.repo
