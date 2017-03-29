@@ -1,0 +1,56 @@
+---
+  # Following might fail with
+  #   msg: Failed to register with 'subscription.rhn.redhat.com': 'RhsmPool' object has no attribute 'PoolId'
+  # Should be already fixed these days upstream:
+  #   https://github.com/ansible/ansible-modules-core/issues/421
+  # So I patched mine Ansible package (ansible-1.9.4-1.fc23.noarch):
+  #   # pwd
+  #   /usr/lib/python2.7/site-packages/ansible/modules/core
+  #   # curl --insecure https://patch-diff.githubusercontent.com/raw/ansible/ansible-modules-core/pull/1204.patch | patch -p 1 --merge
+  #   # vim packaging/os/redhat_subscription.py   # had one merge conflict so had to patch it manually
+  # - action: redhat_subscription
+  #     state=present
+  #     username="{{ rhsm_user }}"
+  #     password="{{ rhsm_pass }}"
+  #     pool="{{ rhsm_pools }}"
+  #     autosubscribe=true
+  #   register: registration
+  #   until: not registration.failed
+  #   retries: 5
+  #   delay: 10
+
+  # Make sure configuration matches hosted servers.
+  # Maybe we had the system registered to some satellite before? Clenup
+  - name: "Make sure configuration matches hosted servers"
+    command:
+      subscription-manager config --server.hostname=subscription.rhsm.redhat.com --server.port=443 --server.prefix=/subscription --rhsm.baseurl=https://cdn.redhat.com --rhsm.ca_cert_dir=/etc/rhsm/ca/ --rhsm.repo_ca_cert=/etc/rhsm/ca/redhat-uep.pem
+
+  # Register and attach to given pool
+  - name: "Register with RHSM"
+    command:
+      subscription-manager register --username "{{ rhsm_user }}" --password "{{ rhsm_pass }}" --force
+    register: registering
+    until: "{{ registering.rc }} == 0"
+    retries: 5
+    delay: 10
+  - name: "Determine pool we are going to attach to"
+    command:
+      subscription-manager list --available --all --matches "{{ rhsm_pool }}" --pool-only
+    register: querying
+    until: "{{ querying.rc }} == 0"
+    retries: 5
+    delay: 10
+  - name: "Attach to the pool"
+    command:
+      subscription-manager attach --pool "{{ querying.stdout_lines|first }}"
+    register: attaching
+    until: "{{ attaching.rc }} == 0"
+    retries: 5
+    delay: 10
+
+  # Make sure only base RHEL repo is attached
+  - name: "Disable all RHSM repos and only enable base RHEL repo"
+    command:
+      subscription-manager repos --disable '*' --enable 'rhel-{{ ansible_distribution_major_version }}-server-rpms'
+    when: registering.changed
+...
