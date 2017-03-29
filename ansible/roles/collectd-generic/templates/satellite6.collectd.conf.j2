@@ -76,7 +76,7 @@ LoadPlugin apache
     Host "localhost"
     Port "5432"
     User "candlepin"
-    Password "{{satellite_candlepin_password.stdout|ini_value}}"
+    Password "{{ candlepin_password[1] }}"
     # Predefined:
     Query backends
     Query transactions
@@ -89,7 +89,7 @@ LoadPlugin apache
     Host "localhost"
     Port "5432"
     User "foreman"
-    Password "{{ candlepin_password }}"
+    Password "{{ satellite_foreman_password.stdout }}"
     # Predefined:
     Query backends
     Query transactions

@@ -38,6 +38,13 @@
 # (akrzos) I have found the use of the yum module for installing EPEL on rhel7 to encounter issues,
 # thus using rpm to install via ansible. This does display a warning in Ansible output.
 #
+- name: Get EPEL rpm
+  get_url:
+    url: http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
+    dest: /root/epel-release.rpm
+  when:
+    - offline_install is undefined
+    - epel_installed.stat.exists == false or epel_enabled.msg != 'OK'
 - name: Install EPEL rpm
   command: rpm -ivh --force {{ epel_release_rpm }}
   become: true

@@ -9,7 +9,7 @@
   vars_files:
     - ../conf/satmon.yaml
   roles:
-    - role: ../satellite/roles/rhsm
+    - role: rhsm
       when:
         - offline_install is undefined
     - { role: graphite }
