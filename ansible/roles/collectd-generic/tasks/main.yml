@@ -155,15 +155,6 @@
 # epel-release and rpm -e fails to remove multiple versions of the
 # package. So we need to check this and remove all one by one
 - name: Disable EPEL
-  shell: |
-    count=$(rpm -q epel-release | wc -l)
-    if [[ $count -gt 1 ]]; then
-      for ver in `rpm -q epel-release`; do
-        rpm -e $ver
-      done
-    else
-      rpm -e epel-release
-    fi
-  ignore_errors: true
-  become: true
-  when: offline_install is undefined
+  yum_repository:
+    name: epel
+    state: absent
