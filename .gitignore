@@ -1,0 +1,6 @@
+#Python cache
+*.pyc
+#Ansible Retry
+*.retry
+#Config Files
+*.ini
