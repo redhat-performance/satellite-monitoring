@@ -1,0 +1,16 @@
+---
+# Build and upload the grafana template for the server
+
+- hosts: grafana
+  remote_user: root
+  gather_facts: false
+  vars_files:
+    - ../conf/satmon.yaml
+  vars:
+    overwrite_existing: true
+    dashboards:
+      - template_name: satellite6
+        process_list_name: Satellite6
+  roles:
+    - dashboard-generic
+...
