@@ -21,6 +21,7 @@ LoadPlugin load
 LoadPlugin memory
 LoadPlugin numa
 LoadPlugin processes
+LoadPlugin statsd
 LoadPlugin swap
 LoadPlugin unixsock
 LoadPlugin uptime
@@ -42,6 +43,14 @@ LoadPlugin apache
        URL "http://127.0.0.1/server-status?auto"
    </Instance>
 </Plugin>
+
+#Setup StatsD
+<Plugin statsd>
+   Host "0.0.0.0"
+   Port "8125"
+   DeleteSets  true
+</Plugin>
+
 
 # Graphite Host Configuration
 <Plugin write_graphite>
