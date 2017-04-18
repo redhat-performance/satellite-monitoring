@@ -17,8 +17,6 @@ set timeout 20
 set superuser [lindex $argv 0]
 set password [lindex $argv 1]
 spawn /usr/lib/python2.7/site-packages/graphite/manage.py syncdb
-expect "Would you like to create one now? (yes/no):"
-send "yes\r";
 expect "Username (leave blank to use 'root'):"
 send "$superuser\r";
 expect "Email address:"
