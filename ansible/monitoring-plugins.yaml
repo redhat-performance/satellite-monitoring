@@ -1,0 +1,11 @@
+---
+# Build and upload the grafana template for the server
+
+- hosts: satellite6
+  remote_user: root
+  gather_facts: false
+  vars_files:
+    - ../conf/satmon.yaml
+  roles:
+    - monitoring-plugins
+...

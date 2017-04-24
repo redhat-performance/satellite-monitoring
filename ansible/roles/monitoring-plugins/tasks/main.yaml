@@ -1,0 +1,32 @@
+---
+- name: Install statsd
+  pip:
+    name: statsd
+    virtualenv: /root/satellite_venv
+
+- name: Install the required packages to run stats collection
+  pip:
+    name: statsd-plugin
+    virtualenv: /root/satellite_venv
+
+- name: Deploy statistics collection service
+  copy:
+    src: satellite_stats.py
+    dest: /usr/bin/satellite_stats.py
+
+- name: Deploy SystemD service
+  copy:
+    src: satellite-reporter.service
+    dest: /usr/lib/systemd/system/satellite-reporter.service
+
+- name: Confirm if collectd is running
+  service:
+    name: collectd
+    state: running
+    enabled: yes
+
+- name: Start the Satellite monitoring service
+  service:
+    name: satellite-reporter
+    state: started
+    enabled: yes
