@@ -6,6 +6,7 @@ Author: Saurabh Badhwar <sbadhwar@redhat.com>
 Date: 24/04/2017
 '''
 from statsd_plugin.StatsdPlugin import StatsdPlugin
+import os
 import subprocess
 
 class Satellite6(StatsdPlugin):
@@ -43,6 +44,16 @@ class Satellite6(StatsdPlugin):
             if "Processes" in field:
                 processes = field.split(':')[1].strip()
         self.store_results('passenger_running_processes', processes)
+
+    def satellite6_postgres_locks(self):
+        '''
+        Collects the metrics about how many locks are being held by postgres
+        Params: None
+        Returns: None
+        '''
+
+        process_data = subprocess.check_output('lsof | grep "postgres" | wc -l', shell=True).split('\n')[0]
+        self.store_results('postgres_locks_held', int(process_data))
 
 if __name__ == '__main__':
     try:
