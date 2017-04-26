@@ -1,0 +1,11 @@
+[Unit]
+Description=Satellite 6 Metric Collection Service
+After=collectd.service
+
+[Service]
+ExecStart=/root/satellite_venv/bin/python /usr/bin/satellite_stats.py
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+Alias=satellite-reporter.service
