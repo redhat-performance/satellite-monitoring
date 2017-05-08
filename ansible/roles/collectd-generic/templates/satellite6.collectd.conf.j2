@@ -22,6 +22,7 @@ LoadPlugin interface
 LoadPlugin irq
 LoadPlugin load
 LoadPlugin memory
+LoadPlugin network
 LoadPlugin numa
 LoadPlugin processes
 LoadPlugin postgresql
@@ -38,6 +39,21 @@ LoadPlugin uptime
   SocketPerms "0770"
   DeleteSocket true
 </Plugin>
+
+{% if collectd_network_interface is defined %}
+#Configure the network interface to use
+<Plugin interface>
+  Interface "{{ collectd_network_interface }}"
+  IgnoreSelected false
+</Plugin>
+{% endif %}
+
+{% if collectd_remote_server is defined %}
+#Configure where should collectd send its data
+<Plugin network>
+  Server "{{ collectd_remote_server }}" "{{ collectd_remote_port }}"
+</Plugin>
+{% endif %}
 
 LoadPlugin apache
 <Plugin apache>
