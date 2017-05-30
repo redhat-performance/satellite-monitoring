@@ -74,7 +74,7 @@ $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/graphite.
 ### To build graphite dashboards:
 
 ```
-$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/dashboards-generic.yaml
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/dashboard-generic.yaml
 ```
 
 #### If collectd fails to send metrics to your grafana instance
