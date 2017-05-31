@@ -101,3 +101,6 @@ OR
 
 ..or all.
 
+### To view your Dashboard visit:
+
+http://<monitoring server>:11202
