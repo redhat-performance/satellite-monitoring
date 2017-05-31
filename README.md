@@ -63,11 +63,11 @@ $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/collectd-
 ### To install graphite server, grafana on Monitoring server:
 
 ```
-$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/grafana.yaml --tags "grafana"
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/grafana.yaml
 ```
 
 ```
-$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/graphite.yaml --tags "graphite"
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/graphite.yaml
 ```
 
 
