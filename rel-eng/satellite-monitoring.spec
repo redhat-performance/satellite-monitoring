@@ -1,5 +1,5 @@
 Name:          satellite-monitoring
-Version:       master
+Version:       1.1
 Release:       1%{?dist}
 Summary:       Configure monitoring of Red Hat Satellite 6
 License:       GPLv2
