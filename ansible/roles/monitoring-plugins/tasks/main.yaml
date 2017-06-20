@@ -1,8 +1,11 @@
 ---
 - name: Install statsd
   pip:
-    name: statsd
+    name: {{ item }}
     virtualenv: /root/satellite_venv
+  with_items:
+    - statsd
+    - psycopg2
 
 - name: Install the required packages to run stats collection
   pip:
