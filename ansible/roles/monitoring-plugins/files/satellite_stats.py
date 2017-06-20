@@ -7,6 +7,7 @@ Date: 24/04/2017
 '''
 from statsd_plugin.StatsdPlugin import StatsdPlugin
 import os
+import psycopg2
 import subprocess
 
 class Satellite6(StatsdPlugin):
@@ -54,6 +55,46 @@ class Satellite6(StatsdPlugin):
 
         process_data = subprocess.check_output('lsof | grep "postgres" | wc -l', shell=True).split('\n')[0]
         self.store_results('postgres_locks_held', int(process_data))
+
+    def satellite6_foreman_dbio(self):
+        '''
+        Collects foreman read/write timings from postgres
+        Params: None
+        Returns: None
+        '''
+
+        db_connection = psycopg2.connect(dbname='postgres', user='postgres')
+        cursor = db_connection.cursor()
+        cursor.execute("SELECT blk_read_time,blk_write_time FROM pg_stat_database WHERE datname='foreman'")
+        try:
+            read_time, write_time = cursor.fetchone()
+            self.store_results('foreman_read_time', int(read_time))
+            self.store_results('foreman_write_time', int(write_time))
+        except ProgrammingError:
+            print "Error reading foreman I/O time"
+        cursor.commit()
+        cursor.close()
+        db_connection.close()
+
+    def satellite6_candlepin_dbio(self):
+        '''
+        Collects foreman read/write timings from postgres
+        Params: None
+        Returns: None
+        '''
+
+        db_connection = psycopg2.connect(dbname='postgres', user='postgres')
+        cursor = db_connection.cursor()
+        cursor.execute("SELECT blk_read_time,blk_write_time FROM pg_stat_database WHERE datname='candlepin'")
+        try:
+            read_time, write_time = cursor.fetchone()
+            self.store_results('candlepin_read_time', int(read_time))
+            self.store_results('candlepin_write_time', int(write_time))
+        except ProgrammingError:
+            print "Error reading candlepin I/O time"
+        cursor.commit()
+        cursor.close()
+        db_connection.close()
 
 if __name__ == '__main__':
     try:
