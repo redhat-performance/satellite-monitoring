@@ -1,7 +1,7 @@
 ---
 - name: Install statsd
   pip:
-    name: {{ item }}
+    name: "{{ item }}"
     virtualenv: /root/satellite_venv
   with_items:
     - statsd
@@ -12,9 +12,17 @@
     name: statsd-plugin
     virtualenv: /root/satellite_venv
 
+- name: Get Candlepin PostgresDB Password
+  command: grep "jpa.config.hibernate.connection.password" /etc/candlepin/candlepin.conf
+  register: satellite_candlepin_password
+
+- name: Get Foreman PostgresDB Password
+  shell: grep "password" /etc/foreman/database.yml | awk '{print $2}' | tr -d '"'
+  register: foreman_password
+
 - name: Deploy statistics collection service
-  copy:
-    src: satellite_stats.py
+  template:
+    src: satellite_stats.py.j2
     dest: /usr/bin/satellite_stats.py
 
 - name: Deploy SystemD service
