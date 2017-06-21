@@ -1,4 +1,5 @@
 #!/usr/bin/python
+{% set candlepin_password = satellite_candlepin_password.stdout.split('=') %}
 '''
 File: satellite_stats.py
 Description: Satellite Stats collection service
@@ -63,7 +64,7 @@ class Satellite6(StatsdPlugin):
         Returns: None
         '''
 
-        db_connection = psycopg2.connect(dbname='postgres', user='postgres')
+        db_connection = psycopg2.connect(dbname='foreman',host='127.0.0.1' ,user='foreman', password="{{ foreman_password.stdout }}")
         cursor = db_connection.cursor()
         cursor.execute("SELECT blk_read_time,blk_write_time FROM pg_stat_database WHERE datname='foreman'")
         try:
@@ -83,7 +84,7 @@ class Satellite6(StatsdPlugin):
         Returns: None
         '''
 
-        db_connection = psycopg2.connect(dbname='postgres', user='postgres')
+        db_connection = psycopg2.connect(dbname='candlepin', host='127.0.0.1', user='candlepin', password="{{ candlepin_password[1] }}")
         cursor = db_connection.cursor()
         cursor.execute("SELECT blk_read_time,blk_write_time FROM pg_stat_database WHERE datname='candlepin'")
         try:
