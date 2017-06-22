@@ -7,6 +7,26 @@ Satellite-monitoring contains simple Ansible playbooks that can be used to perfo
             - Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
        * Satellite Database Operations*
             - Foreman, Candlepin
+            
+# Table of Contents
+* [Introduction](#Introduction)
+* [Preparing your system for setup](#anchors-in-markdown)
+* [Setting up the hosts file](#anchors-in-markdown)
+* [Creating your own personalized configuration for monitoring](#anchors-in-markdown)
+* [Deploying your monitoring setup](#anchors-in-markdown)
+* [Installing optional statsd module](#anchors-in-markdown)
+
+# Introduction
+
+Satellite-monitoring package provides a way through which Satellite 6 users can install Monitoring tools for their Satellite and Capsule installation.
+
+The following setup is currently provided by the satellite-monitoring:
+
+* collectd
+* statsd
+* grafana
+* graphite
+If you want to setup a monitoring for your Satellite installation, follow on with the guide.
 
 ## Getting Started
 Ideally, you need Three hosts to run this project:
