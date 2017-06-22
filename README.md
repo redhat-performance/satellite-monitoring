@@ -10,10 +10,10 @@ Satellite-monitoring contains simple Ansible playbooks that can be used to perfo
             
 # Table of Contents
 * [Introduction](#Introduction)
-* [Preparing your system for setup](#anchors-in-markdown)
-* [Setting up the hosts file](#anchors-in-markdown)
-* [Creating your own personalized configuration for monitoring](#anchors-in-markdown)
-* [Deploying your monitoring setup](#anchors-in-markdown)
+* [Preparing your system for setup](https://github.com/redhat-performance/satellite-monitoring/wiki/Preparing-your-system-for-setup)
+* [Setting up the hosts file](https://github.com/redhat-performance/satellite-monitoring/wiki/Setting-up-your-host-inventory-file)
+* [Creating your own personalized configuration for monitoring](https://github.com/redhat-performance/satellite-monitoring/wiki/Configure-your-Setup)
+* [Deploying your monitoring setup](https://github.com/redhat-performance/satellite-monitoring/wiki/Getting-the-monitoring-up-and-running)
 * [Installing optional statsd module](#anchors-in-markdown)
 
 # Introduction
