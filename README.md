@@ -7,6 +7,7 @@ Satellite-monitoring contains simple Ansible playbooks that can be used to perfo
             - Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
        * Satellite Database Operations*
             - Foreman, Candlepin
+If you want to setup a monitoring for your Satellite installation, follow on with the guide.
 
 ## Getting Started
 Ideally, you need Three hosts to run this project:
@@ -19,6 +20,33 @@ Ideally, you need Three hosts to run this project:
     - Grafana
     - Graphite
     - Carbon 
+### The document used has certain settngs used.
+
+#### Graphite settings
+
+* graphite_prefix: The prefix is used to group the data from different hosts on graphite under a single name. (Default: satellite62)
+* graphite_port: The port on which graphite will be accessible. (Default: 10009)
+* graphite_username: The username for graphite management account (Default: testgraphite)
+* graphite_password: The password used to authenticate with the graphite account (Default: tested12345)
+
+#### Grafana settings
+
+* grafana_username: The username to manage the grafana dashboard (Default: testgrafana)
+* grafana_password: The password to authenticate with grafana dashboard (Default: tested12345)
+
+#### RHSM settings
+
+* rhsm_user: The username for your RHSM account
+* rhsm_pass: The password used to authenticate your RHSM account
+* rhsm_pool: The pool you want to attach to
+
+#### Miscellaneous settings
+
+* satperf_hosts: The variable points to your inventory file which contains the details of your hosts (Default: conf/hosts.ini)
+* offline_install: If you want to go for an offline install when all the required packages are already on your system, you can set the     value to true. (Default: false)
+
+
+
 
 *Note*
 
@@ -36,7 +64,8 @@ Ideally, you need Three hosts to run this project:
    ```console
      # git clone https://github.com/redhat-performance/satellite-monitoring.git
    ```
-   NOTE: Optionally you may utilize the script [control_node_setup.sh] (adhoc-scripts/control_node_setup.sh) to perform step 2 below.  The instructions to use this script are documented in the script itself.
+   NOTE: Optionally you may utilize the script [control_node_setup.sh] (adhoc-scripts/control_node_setup.sh) to perform step 2 below.            The instructions to use this script are documented in the script itself.
+   
 2. Install `ansible` package on the Control node. For RHEL boxes, [access to EPEL] (https://access.redhat.com/solutions/3358) is required.
 
    ```console
