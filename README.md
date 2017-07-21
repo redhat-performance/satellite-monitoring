@@ -42,7 +42,7 @@ Ideally, you need Three hosts to run this project:
    ```console
      # yum install -y ansible
    ```
-3. Create an inventory file named `inventory` (by copying `ansible/inventory.sample`) and update satellite, capsule, grafana, graphite it as necessary:
+3. Create an inventory file named `inventory` (by copying `ansible/hosts.ini.sample`) and update satellite, capsule, grafana, graphite it as necessary:
 
   ```console
     # cp conf/hosts.ini.sample conf/hosts.ini
