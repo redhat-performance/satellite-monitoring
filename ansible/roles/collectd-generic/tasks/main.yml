@@ -3,14 +3,6 @@
 # Install/run collectd for satellite (Generic)
 #
 
-# - name: Import EPEL GPG Key
-#   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
-#     state=present
-
-# - name: Check for EPEL repo
-#   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-#     state=present
-
 - name: Check for EPEL
   shell: rpm -qa | grep -q epel-release
   ignore_errors: true
@@ -18,7 +10,7 @@
 
 - name: Get EPEL repo if not already there
   get_url:
-    url: http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
+    url: "{{ epel_repo }}"
     dest: /root/epel-release.rpm
   when: epel_installed.rc != 0
 
@@ -26,31 +18,11 @@
   shell: rpm -ivh --force /root/epel-release.rpm
   when: epel_installed.rc != 0
 
-# TODO: to use this method, check for presence of epel.repo first
-# - name: Enable EPEL Repo
-#   ini_file: dest=/etc/yum.repos.d/epel.repo
-#     section=epel
-#     option=enabled
-#     value=1
-
 - name: Check for enabled epel-release
   shell: yum repolist | grep -q epel
   ignore_errors: true
   register: epel_enabled
 
-# (akrzos) I have found the use of the yum module for installing EPEL on rhel7 to encounter issues,
-# thus using rpm to install via ansible. This does display a warning in Ansible output.
-#
-#- name: Install EPEL rpm
-#  command: rpm -ivh --force {{ epel_release_rpm }}
-#  become: true
-#  when:
-#    - offline_install is undefined
-#    - epel_installed.rc != 0 or epel_enabled.rc != 0
-
-# (akrzos) yum module works at this point due to the fact the EPEL repo now exists.  EPEL rpm is
-# installed at this point in time.
-#
 - name: Install collectd rpms
   yum: name={{ item }} state=present
   become: true

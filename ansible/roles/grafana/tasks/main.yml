@@ -14,14 +14,6 @@
     msg: "Grafana server not specified or too many of them specified"
 
 
-# - name: Import EPEL GPG Key
-#   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
-#     state=present
-
-# - name: Check for EPEL repo
-#   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-#     state=present
-
 - name: Install grafana rpms
   yum: name={{ item }} state=present
   become: true
