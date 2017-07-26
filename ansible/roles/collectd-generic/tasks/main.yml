@@ -18,7 +18,7 @@
 
 - name: Get EPEL repo if not already there
   get_url:
-    url: http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
+    url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     dest: /root/epel-release.rpm
   when: epel_installed.rc != 0
 
