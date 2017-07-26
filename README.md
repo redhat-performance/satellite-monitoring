@@ -7,6 +7,15 @@ Satellite-monitoring contains simple Ansible playbooks that can be used to perfo
             - Dynflow, Forman-smartproxy, Mongodb, Passenger, Postgres, Pulp, Puppet-agent, Qpidd, Qpid Dispatch Router, Tomcat,  
        * Satellite Database Operations*
             - Foreman, Candlepin
+            
+# Table of Contents
+
+* Introduction
+* Preparing your system for setup
+* Setting up the hosts file
+* Creating your own personalized configuration for monitoring
+* Deploying your monitoring setup
+* Installing optional statsd module
 
 ## Getting Started
 Ideally, you need Three hosts to run this project:
