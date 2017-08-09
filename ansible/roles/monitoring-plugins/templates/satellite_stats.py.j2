@@ -110,6 +110,32 @@ class Satellite6(StatsdPlugin):
         num_open_files = subprocess.check_output(process_query_string, shell=True).split('\n')[0]
         self.store_results('qpidd_open_files', int(num_open_files))
 
+    def satellite6_httpd_files(self):
+        '''
+        Collects the number of open files by httpd
+        Params: None
+        Returns: None
+        '''
+
+        #Get the PID of httpd
+        pid = subprocess.check_output('pidof httpd', shell=True).split('\n')[0]
+        process_query_string = 'lsof {}'.format(pid)
+        num_open_files = subprocess.check_output(process_query_string, shell=True).split('\n')[0]
+        self.store_results('httpd_open_files', int(num_open_files))
+
+    def satellite6_qdrouterd_files(self):
+        '''
+        Collects the number of open files by qdrouterd
+        Params: None
+        Returns: None
+        '''
+
+        #Get the PID of qdrouterd
+        pid = subprocess.check_output('pidof qdrouterd', shell=True).split('\n')[0]
+        process_query_string = 'lsof {}'.format(pid)
+        num_open_files = subprocess.check_output(process_query_string, shell=True).split('\n')[0]
+        self.store_results('qdrouterd_open_files', int(num_open_files))
+
 
 if __name__ == '__main__':
     try:
