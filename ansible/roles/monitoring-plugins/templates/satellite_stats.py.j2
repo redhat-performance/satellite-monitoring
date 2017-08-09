@@ -97,6 +97,20 @@ class Satellite6(StatsdPlugin):
         cursor.close()
         db_connection.close()
 
+    def satellite6_qpidd_files(self):
+        '''
+        Collects the number of open files by qpidd
+        Params: None
+        Returns: None
+        '''
+
+        #Get the PID of qpidd
+        pid = subprocess.check_output('pidof qpidd', shell=True).split('\n')[0]
+        process_query_string = 'lsof {}'.format(pid)
+        num_open_files = subprocess.check_output(process_query_string, shell=True).split('\n')[0]
+        self.store_results('qpidd_open_files', int(num_open_files))
+
+
 if __name__ == '__main__':
     try:
         sat6_plugin = Satellite6()
