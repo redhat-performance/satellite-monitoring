@@ -75,8 +75,8 @@ LoadPlugin apache
 # Graphite Host Configuration
 <Plugin write_graphite>
   <Carbon>
-    Host "{{groups['graphite']|first}}"
-    Port "2003"
+    Host "{{ carbon_host }}"
+    Port "{{ carbon_port }}"
     Prefix "{{graphite_prefix}}."
     Protocol "tcp"
     LogSendErrors true

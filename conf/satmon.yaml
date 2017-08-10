@@ -14,6 +14,10 @@ graphite_port: 10009
 graphite_username: testgraphite
 graphite_password: tested12345
 
+#Carbon Settings
+carbon_host: carbon.example.com
+carbon_port: 2003
+
 #Grafana Settings
 grafana_username: testgrafana
 grafana_password: tested12345
