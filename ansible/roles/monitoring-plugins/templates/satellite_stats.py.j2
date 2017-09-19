@@ -136,6 +136,17 @@ class Satellite6(StatsdPlugin):
         num_open_files = subprocess.check_output(process_query_string, shell=True).split('\n')[0]
         self.store_results('qdrouterd_open_files', int(num_open_files))
 
+    def satellite6_ruby_gc(self):
+        '''
+        Monitors the GC count of ruby to find how many times the GC has run
+        Params: None
+        Returns: None
+        '''
+
+        process_query_string = "ruby -e 'puts GC.stat[:count]'"
+        gc_count = subprocess.check_output(process_query_string, shell=True).split('\n')[0]
+        self.store_results('ruby_gc_count', int(gc_count))
+
 
 if __name__ == '__main__':
     try:
