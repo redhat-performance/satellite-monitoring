@@ -4,7 +4,7 @@ satellite.example.com
 #capsule1.example.com
 #capsule2.example.com
 [graphite]
-#monitoring.example.com
+#graphite.example.com
 [grafana]
-#monitoring.example.com
+#grafana.example.com
 
