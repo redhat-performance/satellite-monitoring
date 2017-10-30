@@ -7,17 +7,6 @@
 # ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini playbooks/monitoring/collectd-generic.yaml --tags="capsules"
 # ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini playbooks/monitoring/collectd-generic.yaml --tags="docker-hosts"
 # ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini playbooks/monitoring/collectd-generic.yaml --tags="satellite6,capsules"
-
-- hosts: graphite
-  remote_user: root
-  vars:
-    config_type: graphite
-  vars_files:
-    - ../conf/satmon.yaml
-  roles:
-    - collectd-generic
-  tags: graphite
-
 - hosts: satellite6
   remote_user: root
   vars:
