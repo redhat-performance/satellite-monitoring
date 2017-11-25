@@ -28,6 +28,18 @@ The following setup is currently provided by the satellite-monitoring:
 * graphite
 If you want to setup a monitoring for your Satellite installation, follow on with the guide.
 
+## Introduction 
+Satellite-monitoring package provides a way through which Satellite 6 users can install Monitoring tools for their Satellite and Capsule installation.
+
+The following setup is currently provided by the satellite-monitoring:
+
+* collectd
+* statsd
+* grafana
+* graphite
+
+If you want to setup a monitoring for your Satellite installation, follow on with the guide.
+
 ## Getting Started
 Ideally, you need Three hosts to run this project:
 
@@ -44,6 +56,57 @@ Ideally, you need Three hosts to run this project:
 
 1. You can get away with using one host by optionally choosing to use `Destination node` as the `Control node`.
 2. Make sure that the `Control node` can connect to the `Destination node` & `Monitirng Server` via paswordless ssh.
+
+## Preparing your system for setup
+
+For satellite-monitoring to work, we need to prepare our system with the required packages.
+Currently, systems with RHEL 6 and RHEL 7 are supported by Satellite-monitoring.
+
+### Enabling EPEL on RHEL Systems
+
+#### For RHEL 6
+
+```console
+     # rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+   ```
+### For RHEL 7
+
+```console
+     # rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+   ```
+### Inastalling Ansible
+
+To install ansible, execute the following command
+
+```console
+     # yum install --enablerepo=epel ansible
+   ```
+
+### Setting up password less SSH
+#### Generate a ssh key
+For setting up passwordless access, you need to generate a ssh key. This can be done by executing the following command :
+
+```console
+     # ssh-keygen -t rsa -b 4096
+   ```
+Follow the prompts as they arrive and leave the passphrase empty
+Once a ssh key has been generated, the next step is to setup this key on all your hosts.
+
+
+
+## Setting up host inventory file.
+
+Step 1: Copy the hosts.ini.sample to hosts.ini
+ ```console
+     # cp conf/hosts.ini.sample conf/hosts.ini
+   ```
+Step 2: Step 2: Open your new hosts.ini for setup
+ ```console
+    vi conf/hosts.ini
+   ```
+Step 3: Step 3: Now we need to add our hosts inside the hosts.ini file. Let's assume, the following case, where satellite lives on one host, and grafana and graphite lives on another host. 
+
+
 
 #### On the Control node:
 
