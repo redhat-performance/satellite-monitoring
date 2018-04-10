@@ -35,18 +35,6 @@
     - graphite-web
     - python-carbon
 
-# moved to grafana specific playbook
-#    - https://grafanarel.s3.amazonaws.com/builds/grafana-2.6.0-1.x86_64.rpm
-
-- name: Copy setup-graphite-db.exp
-  copy:
-    src=setup-graphite-db.exp
-    dest=/root/setup-graphite-db.exp
-    owner=root
-    group=root
-    mode=0755
-  become: true
-
 #TODO: graphite postinstallation settings
 # edit /etc/graphite/local_settings.py
 # and set ALLOWED_HOSTS = ['*'] or more constrained set if you'd like
