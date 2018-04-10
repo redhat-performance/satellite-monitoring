@@ -34,7 +34,6 @@
   with_items:
     - graphite-web
     - python-carbon
-    - expect
 
 # moved to grafana specific playbook
 #    - https://grafanarel.s3.amazonaws.com/builds/grafana-2.6.0-1.x86_64.rpm
@@ -57,7 +56,7 @@
     echo "SECRET_KEY = '{{ 999999999|random }}'" >> /etc/graphite-web/local_settings.py
 
 - name: Create initial graphite db
-  shell: /root/setup-graphite-db.exp {{ graphite_username }} {{ graphite_password }} && chown apache:apache /var/lib/graphite-web/graphite.db
+  shell: python /usr/lib/python2.7/site-packages/graphite/manage.py syncdb --noinput && echo "from django.contrib.auth.models import User; User.objects.create_superuser('{{ graphite_username }}', '', '{{ graphite_password }}')" | python /usr/lib/python2.7/site-packages/graphite/manage.py shell && chown apache:apache /var/lib/graphite-web/graphite.db
   args:
     creates: /var/lib/graphite-web/graphite.db
   become: true
