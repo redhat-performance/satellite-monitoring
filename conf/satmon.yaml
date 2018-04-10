@@ -19,8 +19,8 @@ carbon_host: carbon.example.com
 carbon_port: 2003
 
 #Grafana Settings
-grafana_username: testgrafana
-grafana_password: tested12345
+grafana_username: admin
+grafana_password: admin
 grafana_port: 11202
 
 #RHSM Settings
