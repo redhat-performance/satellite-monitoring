@@ -56,10 +56,11 @@ Ideally, you need Three hosts to run this project:
    ```console
      # git clone https://github.com/redhat-performance/satellite-monitoring.git
    ```
-   NOTE: Optionally you may utilize the script [control_node_setup.sh] (adhoc-scripts/control_node_setup.sh) to perform step 2 below.  The instructions to use this script are documented in the script itself.
-2. Install `ansible` package on the Control node. For RHEL boxes, [access to EPEL] (https://access.redhat.com/solutions/3358) is required.
+   NOTE: Optionally you may utilize the script [control_node_setup.sh](adhoc-scripts/control_node_setup.sh) to perform step 2 below.  The instructions to use this script are documented in the script itself.
+2. Install `ansible` package on the Control node. For RHEL boxes, [follow the instruction in this article to enable the correct repository](https://access.redhat.com/articles/3174981).
 
    ```console
+     # subscription-manager repos --enable rhel-7-server-ansible-VERSION-rpms
      # yum install -y ansible
    ```
 3. Create an inventory file named `inventory` (by copying `ansible/hosts.ini.sample`) and update satellite, capsule, grafana, graphite it as necessary:
