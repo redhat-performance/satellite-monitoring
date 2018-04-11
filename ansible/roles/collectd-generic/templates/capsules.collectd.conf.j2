@@ -113,6 +113,9 @@ LoadPlugin apache
 
   # Foreman smart proxy
   ProcessMatch "Foreman-SmartProxy" "ruby.+/usr/share/foreman-proxy/bin/smart-proxy"
+  
+  # Smartproxy Dynflow core
+  ProcessMatch "DynFlow-SmartProxy-Core" "ruby.+/usr/bin/smart_proxy_dynflow_core"
 
   # Tomcat
   ProcessMatch "Tomcat" ".*tomcat.*"
