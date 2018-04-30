@@ -163,6 +163,8 @@ LoadPlugin apache
   # Foreman smart proxy
   ProcessMatch "Foreman-SmartProxy" "ruby.+/usr/share/foreman-proxy/bin/smart-proxy"
 
+  # Squid
+  Process "squid"
   # Tomcat
   ProcessMatch "Tomcat" ".*tomcat.*"
 
