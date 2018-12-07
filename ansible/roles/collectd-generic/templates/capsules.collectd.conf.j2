@@ -55,7 +55,7 @@ LoadPlugin apache
 # Graphite Host Configuration
 <Plugin write_graphite>
   <Carbon>
-    Host "{{ carbon_host }}"
+    Host "{{ groups['graphite']|first }}"
     Port "{{ carbon_port }}"
     Prefix "{{graphite_prefix}}."
     Protocol "tcp"
