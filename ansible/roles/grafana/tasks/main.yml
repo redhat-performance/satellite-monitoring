@@ -63,6 +63,16 @@
 - name: Wait for grafana to be ready
   wait_for: host=localhost port={{grafana_port}} delay=5 timeout=30
 
+- name: Stop firewall services
+  service:
+    name: "{{ item }}"
+    enabled: no
+    state: stopped
+  loop:
+    - iptables
+    - firewalld
+  ignore_errors: yes
+
 #
 # Add graphite server as a default datasource
 #
