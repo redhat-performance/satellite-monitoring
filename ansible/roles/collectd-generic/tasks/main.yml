@@ -24,9 +24,10 @@
   register: epel_enabled
 
 - name: Install collectd rpms
-  yum: name={{ item }} state=present
+  yum:
+    name: "{{collectd_packages[config_type]}}"
+    state: present
   become: true
-  with_items: "{{collectd_packages[config_type]}}"
   register: install_collectd
 
 #create /etc/httpd/conf.d if not exist
