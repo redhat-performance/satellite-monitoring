@@ -14,15 +14,17 @@
     msg: "Grafana server not specified or too many of them specified"
 
 
-- name: Install grafana rpms
-  yum: name={{ item }} state=present
+- name: Install grafana rpms online
+  yum:
+    name: https://grafanarel.s3.amazonaws.com/builds/grafana-2.6.0-1.x86_64.rpm
+    state: present
   become: true
-  with_items:
-    - https://grafanarel.s3.amazonaws.com/builds/grafana-2.6.0-1.x86_64.rpm
   when: offline_install is undefined
 
-- name: Install grafana rpms
-  yum: name={{ item }} state=present
+- name: Install grafana rpms offline
+  yum:
+    name: grafana
+    state: present
   become: true
   with_items:
     - grafana
