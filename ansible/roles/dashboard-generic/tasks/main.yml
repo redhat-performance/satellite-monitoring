@@ -25,6 +25,7 @@
   template:
     src: "{{item.template_name}}_general_system_performance.json.j2"
     dest: "/root/{{item.process_list_name}}_general_system_performance.json"
+    force: yes
   with_items: "{{dashboards}}"
 
 # TODO replace with "uri" module some day?
