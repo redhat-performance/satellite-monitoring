@@ -127,6 +127,10 @@
 # because somebody deleted the .repo files without uninstalling
 # epel-release and rpm -e fails to remove multiple versions of the
 # package. So we need to check this and remove all one by one
+- name: Delete EPEL repo package
+  yum:
+    name: epel-release
+    state: absent
 - name: Disable EPEL
   yum_repository:
     name: epel
