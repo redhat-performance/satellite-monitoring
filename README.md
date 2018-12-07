@@ -81,21 +81,12 @@ $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/collectd-
 $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/collectd-generic.yaml --tags "capsules"
 ```
 
-### To install graphite server, grafana on Monitoring server:
-
-```
-$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/grafana.yaml
-```
+### To install and configure graphite and grafana on Monitoring server:
 
 ```
 $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/graphite.yaml
-```
-
-
-### To build graphite dashboards:
-
-```
 $ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/dashboard-generic.yaml
+$ ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini ansible/grafana.yaml
 ```
 
 #### If collectd fails to send metrics to your grafana instance
