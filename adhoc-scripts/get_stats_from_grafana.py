@@ -537,6 +537,34 @@ targets = [
     ("alias($Cloud.$Node.apache.apache_requests, 'Requests')", "Apache -> C/N - Apache Stats -> Requests"),
     ("aliasByNode(aliasSub($Cloud.$Node.apache.apache_scoreboard-*, 'apache_scoreboard-', ''), 3)", "Apache -> C/N - Apache Scoreboard -> aliasByNode(aliasSub($Cloud.$Node.apache.apache_scoreboard-*, 'apache_scoreboard-', ''), 3)"),
 ]
+
+targets = [
+    ("$Cloud.$Node.load.load.shortterm", "Load / Uptime -> C/N - Load Averages / Uptime -> 1m avg"),
+    ("$Cloud.$Node.memory.memory-used", "Memory & Swap -> C/N - Memory in Bytes -> Used"),
+    ("$Cloud.$Node.swap.swap-used", "Memory & Swap -> C/N - Swap Usage -> Used"),
+    ("sum($Cloud.$Node.*.disk_octets.read)", "Disk -> C/N - $Disk Throughput -> Read"),
+    ("sum($Cloud.$Node.*.disk_octets.write)", "Disk -> C/N - $Disk Throughput -> Write"),
+
+    ("$Cloud.$Node.processes-httpd.ps_rss", "Satellite6 Process Memory -> Summerized -> httpd RSS"),
+    ("$Cloud.$Node.processes-ruby.ps_rss", "Satellite6 Process Memory -> Summerized -> ruby RSS"),
+    ("$Cloud.$Node.processes-dynflow_executor.ps_rss", "Satellite6 Process Memory -> Summerized -> dynflow_executor RSS"),
+    ("$Cloud.$Node.processes-postgres.ps_rss", "Satellite6 Process Memory -> Summerized -> postgresql RSS"),
+    ("$Cloud.$Node.processes-Tomcat.ps_rss", "Satellite6 Process Memory -> Summerized -> tomcat RSS"),
+    ("$Cloud.$Node.processes-qpidd.ps_rss", "Satellite6 Process Memory -> Summerized -> qpidd RSS"),
+    ("$Cloud.$Node.processes-qdrouterd.ps_rss", "Satellite6 Process Memory -> Summerized -> qdrouterd RSS"),
+
+    ("scale($Cloud.$Node.processes-httpd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> httpd User"),
+    ("scale($Cloud.$Node.processes-ruby.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> ruby User"),
+    ("scale($Cloud.$Node.processes-dynflow_executor.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> dynflow_executor User"),
+    ("scale($Cloud.$Node.processes-postgres.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> ruby User"),
+    ("scale($Cloud.$Node.processes-Tomcat.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> tomcat User"),
+    ("scale($Cloud.$Node.processes-qpidd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> qpidd User"),
+    ("scale($Cloud.$Node.processes-qdrouterd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> qdrouterd User"),
+
+    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-del", "PostgreSQL -> Foreman Tuple Operations -> c-del"),
+    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-ins", "PostgreSQL -> Foreman Tuple Operations -> c-ins"),
+    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-upd", "PostgreSQL -> Foreman Tuple Operations -> c-upd"),
+]
 logging.debug("Metrics: %s" % targets)
 
 # What is the Graphite server we should talk to
