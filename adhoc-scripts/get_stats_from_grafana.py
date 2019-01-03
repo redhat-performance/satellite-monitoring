@@ -603,7 +603,7 @@ for i in range(0, len(targets), args.chunk_size):
         raise Exception("Request failed")
     data += r.json()
 
-table_header = ['metric', 'min', 'max', 'mean', 'median', 'integral', 'pstdev', 'pvariance']
+table_header = ['metric', 'min', 'max', 'mean', 'median', 'integral', 'pstdev', 'pvariance', 'interval']
 table_data = []
 file_data = {}
 for d in data:
@@ -616,7 +616,8 @@ for d in data:
     d_integral = scipy.integrate.simps(d_plain, d_timestamps)
     d_pstdev = statistics.pstdev(d_plain)
     d_pvariance = statistics.pvariance(d_plain)
-    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance]
+    d_duration = d_timestamps[-1] - d_timestamps[0]
+    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_duration]
     table_data.append(table_row)
     file_data[d['target']] = {table_header[i]:table_row[i] for i in range(len(table_header))}
 print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
