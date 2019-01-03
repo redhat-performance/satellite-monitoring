@@ -8,6 +8,7 @@ import requests
 import statistics
 import scipy.integrate
 import tabulate
+import json
 
 parser = argparse.ArgumentParser(description='Get stats from Graphite/Grafana for given interval')
 parser.add_argument('from_ts', type=int,
@@ -20,6 +21,8 @@ parser.add_argument('--port', type=int, default=11202,
                     help='Port Grafana is listening on')
 parser.add_argument('--prefix', default='satellite62',
                     help='Prefix for data in Graphite')
+parser.add_argument('--file', default='/tmp/get_stats_from_grafana.json',
+                    help='Save stats to this file')
 parser.add_argument('--debug', action='store_true',
                     help='Debug mode')
 args = parser.parse_args()
@@ -66,6 +69,7 @@ data = r.json()
 
 table_header = ['metric', 'min', 'max', 'mean', 'median', 'integral', 'pstdev', 'pvariance']
 table_data = []
+file_data = {}
 for d in data:
     d_plain = [i[0] for i in d['datapoints']]
     d_timestamps = [i[1] for i in d['datapoints']]
@@ -76,5 +80,11 @@ for d in data:
     d_integral = scipy.integrate.simps(d_plain, d_timestamps)
     d_pstdev = statistics.pstdev(d_plain)
     d_pvariance = statistics.pvariance(d_plain)
-    table_data.append([d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance])
+    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance]
+    table_data.append(table_row)
+    file_data[d['target']] = {table_header[i]:table_row[i] for i in range(len(table_header))}
 print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
+
+with open(args.file, 'w') as fp:
+    json.dump(file_data, fp, indent=4)
+    logging.info("Stats saved into %s" % args.file)
