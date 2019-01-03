@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+import sys
 import argparse
 import logging
 import configparser
@@ -9,6 +10,7 @@ import statistics
 import scipy.integrate
 import tabulate
 import json
+import csv
 
 parser = argparse.ArgumentParser(description='Get stats from Graphite/Grafana for given interval')
 parser.add_argument('from_ts', type=int,
@@ -25,6 +27,8 @@ parser.add_argument('--prefix', default='satellite62',
                     help='Prefix for data in Graphite')
 parser.add_argument('--file', default='/tmp/get_stats_from_grafana.json',
                     help='Save stats to this file')
+parser.add_argument('--csv', action='store_true',
+                    help='Output data table to stdout in csv (defauts to table)')
 parser.add_argument('--debug', action='store_true',
                     help='Debug mode')
 args = parser.parse_args()
@@ -620,7 +624,13 @@ for d in data:
     table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_duration]
     table_data.append(table_row)
     file_data[d['target']] = {table_header[i]:table_row[i] for i in range(len(table_header))}
-print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
+
+if args.csv:
+    spamwriter = csv.writer(sys.stdout)
+    spamwriter.writerow(table_header)
+    spamwriter.writerows(table_data)
+else:
+    print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
 
 with open(args.file, 'w') as fp:
     json.dump(file_data, fp, indent=4)

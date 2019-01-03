@@ -4,16 +4,20 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+import sys
 import argparse
 import logging
 import tabulate
 import json
+import csv
 
 parser = argparse.ArgumentParser(description='Compare stats files from Graphite/Grafana')
 parser.add_argument('first_file', type=argparse.FileType('r'),
                     help='first file with stats, baseline for a comparision')
 parser.add_argument('second_file', type=argparse.FileType('r'),
                     help='second stats file to compare to baseline')
+parser.add_argument('--csv', action='store_true',
+                    help='Output comparasion table to stdout in csv (defauts to table)')
 parser.add_argument('--debug', action='store_true',
                     help='Debug mode')
 args = parser.parse_args()
@@ -39,4 +43,10 @@ for metric in data_first:
         except ZeroDivisionError:
             table_row.append('Err')
     table_data.append(table_row)
-print(tabulate.tabulate(table_data, headers=table_header))
+
+if args.csv:
+    spamwriter = csv.writer(sys.stdout)
+    spamwriter.writerow(table_header)
+    spamwriter.writerows(table_data)
+else:
+    print(tabulate.tabulate(table_data, headers=table_header))
