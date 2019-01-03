@@ -34,6 +34,9 @@ for metric in data_first:
         logging.debug("Processing %s -> %s" % (metric, factor))
         value_first = data_first[metric][factor]
         value_second = data_second[metric][factor]
-        table_row.append(float(value_second - value_first) / value_first * 100)
+        try:
+            table_row.append("%.1f" % (float(value_second - value_first) / value_first * 100))
+        except ZeroDivisionError:
+            table_row.append('Err')
     table_data.append(table_row)
-print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.1f'))
+print(tabulate.tabulate(table_data, headers=table_header))
