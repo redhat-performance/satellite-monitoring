@@ -1,13 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-#curl 'http://c03-h30-r620.rdu.openstack.engineering.redhat.com:11202/api/datasources/proxy/1/render'
-#   -H 'Accept: application/json, text/plain, */*'
-#   -H 'Accept-Language: en-US,en;q=0.5'
-#   --compressed
-#   -H 'Content-Type: application/x-www-form-urlencoded'
-#   --data $'target=alias(satellite62.cloud02-sat-vm1_rdu_openstack_engineering_redhat_com.load.load.shortterm%2C%20\'1m%20avg\')&target=alias(satellite62.cloud02-sat-vm1_rdu_openstack_engineering_redhat_com.load.load.midterm%2C%20\'5m%20avg\')&target=alias(satellite62.cloud02-sat-vm1_rdu_openstack_engineering_redhat_com.load.load.longterm%2C%20\'15m%20avg\')&from=-5min&until=now&format=json&maxDataPoints=1908'
-
 import argparse
 import logging
 import configparser
