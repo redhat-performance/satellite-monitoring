@@ -13,6 +13,8 @@ import logging
 import configparser
 import requests
 import statistics
+import scipy.integrate
+import tabulate
 
 parser = argparse.ArgumentParser(description='Get stats from Graphite/Grafana for given interval')
 parser.add_argument('from_ts', type=int,
@@ -69,12 +71,17 @@ if not r.ok:
     raise Exception("Request failed")
 data = r.json()
 
+table_header = ['metric', 'min', 'max', 'mean', 'median', 'integral', 'pstdev', 'pvariance']
+table_data = []
 for d in data:
     d_plain = [i[0] for i in d['datapoints']]
+    d_timestamps = [i[1] for i in d['datapoints']]
     d_min = min(d_plain)
     d_max = max(d_plain)
     d_mean = statistics.mean(d_plain)
     d_median = statistics.median(d_plain)
+    d_integral = scipy.integrate.simps(d_plain, d_timestamps)
     d_pstdev = statistics.pstdev(d_plain)
     d_pvariance = statistics.pvariance(d_plain)
-    print([d['target'], d_min, d_max, d_mean, d_median, d_pstdev, d_pvariance])
+    table_data.append([d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance])
+print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
