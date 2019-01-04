@@ -607,20 +607,20 @@ for i in range(0, len(targets), args.chunk_size):
         raise Exception("Request failed")
     data += r.json()
 
-table_header = ['metric', 'min', 'max', 'mean', 'median', 'integral', 'pstdev', 'pvariance', 'interval']
+table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'duration']
 table_data = []
 file_data = {}
 for d in data:
     d_plain = [i[0] for i in d['datapoints'] if i[0] is not None]
     d_timestamps = [i[1] for i in d['datapoints'] if i[0] is not None]
+    d_duration = d_timestamps[-1] - d_timestamps[0]
     d_min = min(d_plain)
     d_max = max(d_plain)
     d_mean = statistics.mean(d_plain)
     d_median = statistics.median(d_plain)
-    d_integral = scipy.integrate.simps(d_plain, d_timestamps)
+    d_integral = scipy.integrate.simps(d_plain, d_timestamps) / d_duration
     d_pstdev = statistics.pstdev(d_plain)
     d_pvariance = statistics.pvariance(d_plain)
-    d_duration = d_timestamps[-1] - d_timestamps[0]
     table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_duration]
     table_data.append(table_row)
     file_data[d['target']] = {table_header[i]:table_row[i] for i in range(len(table_header))}

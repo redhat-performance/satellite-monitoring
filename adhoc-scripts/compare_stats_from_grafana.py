@@ -30,7 +30,7 @@ logging.debug("Arguments: %s" % args)
 data_first = json.load(args.first_file)
 data_second = json.load(args.second_file)
 
-table_header = ['metric', 'min', 'max', 'mean', 'median', 'integral', 'pstdev', 'pvariance', 'interval']
+table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'duration']
 table_data = []
 for metric in data_first:
     table_row = [metric]
