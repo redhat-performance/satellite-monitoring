@@ -565,9 +565,12 @@ targets = [
     ("scale($Cloud.$Node.processes-qpidd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> qpidd User"),
     ("scale($Cloud.$Node.processes-qdrouterd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> qdrouterd User"),
 
-    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-del", "PostgreSQL -> Foreman Tuple Operations -> c-del"),
-    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-ins", "PostgreSQL -> Foreman Tuple Operations -> c-ins"),
-    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-upd", "PostgreSQL -> Foreman Tuple Operations -> c-upd"),
+    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-del", "PostgreSQL -> Candlepin Tuple Operations -> c-del"),
+    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-ins", "PostgreSQL -> Candlepin Tuple Operations -> c-ins"),
+    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-upd", "PostgreSQL -> Candlepin Tuple Operations -> c-upd"),
+    ("$Cloud.$Node.postgresql-foreman.pg_n_tup_c-del", "PostgreSQL -> Foreman Tuple Operations -> c-del"),
+    ("$Cloud.$Node.postgresql-foreman.pg_n_tup_c-ins", "PostgreSQL -> Foreman Tuple Operations -> c-ins"),
+    ("$Cloud.$Node.postgresql-foreman.pg_n_tup_c-upd", "PostgreSQL -> Foreman Tuple Operations -> c-upd"),
 ]
 logging.debug("Metrics: %s" % targets)
 
