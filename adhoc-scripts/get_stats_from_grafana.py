@@ -7,6 +7,7 @@ import logging
 import requests
 import statistics
 import scipy.integrate
+import numpy
 import tabulate
 import json
 import csv
@@ -24,6 +25,8 @@ parser.add_argument('--port', type=int, default=11202,
                     help='Port Grafana is listening on')
 parser.add_argument('--prefix', default='satellite62',
                     help='Prefix for data in Graphite')
+parser.add_argument('--node', default='satellite_satperf_local',
+                    help='Monitored host node name in Graphite')
 parser.add_argument('--file', default='/tmp/get_stats_from_grafana.json',
                     help='Save stats to this file')
 parser.add_argument('--csv', action='store_true',
@@ -72,35 +75,49 @@ logging.debug("Metrics: %s" % targets)
 
 def sanitize_target(target):
     target = target.replace('$Cloud', args.prefix)
-    target = target.replace('$Node', 'cloud02-sat-vm1_rdu_openstack_engineering_redhat_com')
+    target = target.replace('$Node', args.node)
     return target
 
-data = []
-for i in range(0, len(targets), args.chunk_size):
-    targets_chunk = targets[i:i+args.chunk_size]
+def get_data(targets, args):
+    data = []
+    for i in range(0, len(targets), args.chunk_size):
+        targets_chunk = targets[i:i+args.chunk_size]
 
-    # Metadata for the request
-    headers = {
-        'Accept': 'application/json, text/plain, */*',
-    }
-    params = {
-        'target': ["alias(%s, '%s')" % (sanitize_target(k), v) for k,v in targets_chunk],
-        'from': args.from_ts,
-        'until': args.to_ts,
-        'format': 'json',
-    }
-    url = "http://%s:%s/api/datasources/proxy/1/render" % (args.graphite, args.port)
+        # Metadata for the request
+        headers = {
+            'Accept': 'application/json, text/plain, */*',
+        }
+        params = {
+            'target': ["alias(%s, '%s')" % (sanitize_target(k), v) for k,v in targets_chunk],
+            'from': args.from_ts,
+            'until': args.to_ts,
+            'format': 'json',
+        }
+        url = "http://%s:%s/api/datasources/proxy/1/render" % (args.graphite, args.port)
 
-    r = requests.get(url=url, headers=headers, params=params)
-    if not r.ok:
-        logging.error("URL = %s" % r.url)
-        logging.error("headers = %s" % r.headers)
-        logging.error("status code = %s" % r.status_code)
-        logging.error("text = %s" % r.text)
-        raise Exception("Request failed")
-    data += r.json()
+        r = requests.get(url=url, headers=headers, params=params)
+        if not r.ok:
+            logging.error("URL = %s" % r.url)
+            logging.error("headers = %s" % r.headers)
+            logging.error("status code = %s" % r.status_code)
+            logging.error("text = %s" % r.text)
+            raise Exception("Request failed")
+        logging.debug("Response: %s" % r.json())
+        data += r.json()
+    return data
 
-table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'duration']
+def get_hist(data):
+    hist_counts, hist_borders = numpy.histogram(data)
+    hist_counts = [float(i) for i in hist_counts]
+    hist_borders = [float(i) for i in hist_borders]
+    out = []
+    for i in range(len(hist_counts)):
+        out.append(((hist_borders[i], hist_borders[i+1]), hist_counts[i]))
+    return out
+
+data = get_data(targets, args)
+
+table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'histogram', 'duration']
 table_data = []
 file_data = {}
 for d in data:
@@ -114,7 +131,8 @@ for d in data:
     d_integral = scipy.integrate.simps(d_plain, d_timestamps) / d_duration
     d_pstdev = statistics.pstdev(d_plain)
     d_pvariance = statistics.pvariance(d_plain)
-    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_duration]
+    d_hist = get_hist(d_plain)
+    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_hist, d_duration]
     table_data.append(table_row)
     file_data[d['target']] = {table_header[i]:table_row[i] for i in range(len(table_header))}
 
