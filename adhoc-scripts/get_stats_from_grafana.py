@@ -4,7 +4,6 @@
 import sys
 import argparse
 import logging
-import configparser
 import requests
 import statistics
 import scipy.integrate
@@ -17,8 +16,8 @@ parser.add_argument('from_ts', type=int,
                     help='timestamp (UTC) of start of the interval')
 parser.add_argument('to_ts', type=int,
                     help='timestamp (UTC) of end of the interval')
-parser.add_argument('--inventory', default='conf/inventory.ini',
-                    help='Inventory where is the Graphite server defined')
+parser.add_argument('--graphite', required=True,
+                    help='Graphite server to talk to')
 parser.add_argument('--chunk_size', type=int, default=10,
                     help='How many metrices to obtain from Grafana at one request')
 parser.add_argument('--port', type=int, default=11202,
@@ -574,12 +573,6 @@ targets = [
 ]
 logging.debug("Metrics: %s" % targets)
 
-# What is the Graphite server we should talk to
-cfg = configparser.ConfigParser()
-cfg.read(args.inventory)
-graphite = cfg.items('graphite')[0][0].split()[0]
-logging.debug("Graphite server: %s" % graphite)
-
 def sanitize_target(target):
     target = target.replace('$Cloud', args.prefix)
     target = target.replace('$Node', 'cloud02-sat-vm1_rdu_openstack_engineering_redhat_com')
@@ -599,7 +592,7 @@ for i in range(0, len(targets), args.chunk_size):
         'until': args.to_ts,
         'format': 'json',
     }
-    url = "http://%s:%s/api/datasources/proxy/1/render" % (graphite, args.port)
+    url = "http://%s:%s/api/datasources/proxy/1/render" % (args.graphite, args.port)
 
     r = requests.get(url=url, headers=headers, params=params)
     if not r.ok:
