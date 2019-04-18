@@ -122,7 +122,8 @@ def get_hist(data):
     return out
 
 def reformat_hist(data):
-    return ','.join(["%.2f-%.2f:%d" % (i[0][0], i[0][1], i[1]) for i in data])
+    #return ','.join(["%.2f-%.2f:%d" % (i[0][0], i[0][1], i[1]) for i in data])
+    return ','.join(["%d" % i[1] for i in data])
 
 data = get_data(targets, args)
 
