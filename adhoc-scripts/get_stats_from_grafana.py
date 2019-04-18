@@ -25,6 +25,10 @@ parser.add_argument('--port', type=int, default=11202,
                     help='Port Grafana is listening on')
 parser.add_argument('--prefix', default='satellite62',
                     help='Prefix for data in Graphite')
+parser.add_argument('--datasource', type=int, default=1,
+                    help='Datasource ID in Grafana')
+parser.add_argument('--token', default=None,
+                    help='Authorization token without the "Bearer: " part')
 parser.add_argument('--node', default='satellite_satperf_local',
                     help='Monitored host node name in Graphite')
 parser.add_argument('--file', default='/tmp/get_stats_from_grafana.json',
@@ -87,13 +91,15 @@ def get_data(targets, args):
         headers = {
             'Accept': 'application/json, text/plain, */*',
         }
+        if args.token is not None:
+            headers['Authorization'] = 'Bearer %s' % args.token
         params = {
             'target': ["alias(%s, '%s')" % (sanitize_target(k), v) for k,v in targets_chunk],
             'from': args.from_ts,
             'until': args.to_ts,
             'format': 'json',
         }
-        url = "http://%s:%s/api/datasources/proxy/1/render" % (args.graphite, args.port)
+        url = "http://%s:%s/api/datasources/proxy/%s/render" % (args.graphite, args.port, args.datasource)
 
         r = requests.get(url=url, headers=headers, params=params)
         if not r.ok:
