@@ -121,6 +121,9 @@ def get_hist(data):
         out.append(((hist_borders[i], hist_borders[i+1]), hist_counts[i]))
     return out
 
+def reformat_hist(data):
+    return ','.join(["%.2f-%.2f:%d" % (i[0][0], i[0][1], i[1]) for i in data])
+
 data = get_data(targets, args)
 
 table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'histogram', 'duration']
@@ -147,6 +150,9 @@ if args.csv:
     spamwriter.writerow(table_header)
     spamwriter.writerows(table_data)
 else:
+    hist_id = table_header.index('histogram')
+    for row in table_data:
+        row[hist_id] = reformat_hist(row[hist_id])
     print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
 
 with open(args.file, 'w') as fp:
