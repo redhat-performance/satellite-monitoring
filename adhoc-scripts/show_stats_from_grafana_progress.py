@@ -45,8 +45,8 @@ for snap_name, snap_data in data.items():
     table_row = [snap_name]
     for metric in metrics:
         for factor in table_header_items:
-            logging.debug("Processing %s -> %s -> %s" % (snap_name, metric, factor))
             value = snap_data[metric][factor]
+            logging.debug("Processing %s -> %s -> %s: %s" % (snap_name, metric, factor, value))
             table_row.append("%.1f" % value)
     table_data.append(table_row)
 
