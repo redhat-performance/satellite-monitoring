@@ -133,7 +133,10 @@ file_data = {}
 for d in data:
     d_plain = [i[0] for i in d['datapoints'] if i[0] is not None]
     d_timestamps = [i[1] for i in d['datapoints'] if i[0] is not None]
-    d_duration = d_timestamps[-1] - d_timestamps[0]
+    d_duration = args.to_ts - args.from_ts
+    if len(d_plain) < 5:
+        logging.warning('Very low number of datapoints returned for %s: %s' % (d['target'], len(d_plain)))
+
     d_min = min(d_plain)
     d_max = max(d_plain)
     d_mean = statistics.mean(d_plain)
