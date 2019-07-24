@@ -31,6 +31,8 @@ parser.add_argument('--token', default=None,
                     help='Authorization token without the "Bearer: " part')
 parser.add_argument('--node', default='satellite_satperf_local',
                     help='Monitored host node name in Graphite')
+parser.add_argument('--interface', default='interface-em1',
+                    help='Monitored host network interface name in Graphite')
 parser.add_argument('--file', default='/tmp/get_stats_from_grafana.json',
                     help='Save stats to this file')
 parser.add_argument('--csv', action='store_true',
@@ -46,11 +48,13 @@ logging.debug("Arguments: %s" % args)
 
 # Metrics we are interested in and their aliases
 targets = [
-    ("$Cloud.$Node.load.load.shortterm", "Load / Uptime -> C/N - Load Averages / Uptime -> 1m avg"),
-    ("$Cloud.$Node.memory.memory-used", "Memory & Swap -> C/N - Memory in Bytes -> Used"),
-    ("$Cloud.$Node.swap.swap-used", "Memory & Swap -> C/N - Swap Usage -> Used"),
-    ("sum($Cloud.$Node.*.disk_octets.read)", "Disk -> C/N - $Disk Throughput -> Read"),
-    ("sum($Cloud.$Node.*.disk_octets.write)", "Disk -> C/N - $Disk Throughput -> Write"),
+    ("$Cloud.$Node.load.load.shortterm", "Load / Uptime -> C/N - Load Averages -> 1m avg [-]"),
+    ("$Cloud.$Node.memory.memory-used", "Memory & Swap -> C/N - Memory -> Used [b]"),
+    ("$Cloud.$Node.swap.swap-used", "Memory & Swap -> C/N - Swap -> Used [b]"),
+    ("scale(sum($Cloud.$Node.*.disk_octets.read), 8)", "Disk -> C/N - Disk Throughput -> Read [b]"),
+    ("scale(sum($Cloud.$Node.*.disk_octets.write), 8)", "Disk -> C/N - Disk Throughput -> Write [b]"),
+    ("scale($Cloud.$Node.$Interface.if_octets.tx, 8)", "Network -> C/N - $Interface Throughput -> TX [b]"),
+    ("scale($Cloud.$Node.$Interface.if_octets.rx, 8)", "Network -> C/N - $Interface Throughput -> RX [b]"),
 
     ("$Cloud.$Node.processes-httpd.ps_rss", "Satellite6 Process Memory -> Summerized -> httpd RSS"),
     ("$Cloud.$Node.processes-ruby.ps_rss", "Satellite6 Process Memory -> Summerized -> ruby RSS"),
@@ -80,6 +84,7 @@ logging.debug("Metrics: %s" % targets)
 def sanitize_target(target):
     target = target.replace('$Cloud', args.prefix)
     target = target.replace('$Node', args.node)
+    target = target.replace('$Interface', args.interface)
     return target
 
 def get_data(targets, args):
