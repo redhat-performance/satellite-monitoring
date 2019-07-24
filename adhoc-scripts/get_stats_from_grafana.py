@@ -132,15 +132,16 @@ def reformat_hist(data):
 
 data = get_data(targets, args)
 
-table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'histogram', 'duration']
+table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'histogram', 'duration', 'datapoints']
 table_data = []
 file_data = {}
 for d in data:
     d_plain = [i[0] for i in d['datapoints'] if i[0] is not None]
     d_timestamps = [i[1] for i in d['datapoints'] if i[0] is not None]
     d_duration = args.to_ts - args.from_ts
-    if len(d_plain) < 5:
-        logging.warning('Very low number of datapoints returned for %s: %s' % (d['target'], len(d_plain)))
+    d_len = len(d_plain)
+    if d_len < 5:
+        logging.warning('Very low number of datapoints returned for %s: %s' % (d['target'], d_len))
 
     d_min = min(d_plain)
     d_max = max(d_plain)
@@ -150,7 +151,7 @@ for d in data:
     d_pstdev = statistics.pstdev(d_plain)
     d_pvariance = statistics.pvariance(d_plain)
     d_hist = get_hist(d_plain)
-    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_hist, d_duration]
+    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_hist, d_duration, d_len]
     table_data.append(table_row)
     file_data[d['target']] = {table_header[i]:table_row[i] for i in range(len(table_header))}
 
