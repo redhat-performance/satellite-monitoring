@@ -1,0 +1,61 @@
+---
+-
+  - $Cloud.$Node.processes-httpd.ps_rss
+  - Satellite6 Process Memory -> Summerized -> httpd RSS
+-
+  - $Cloud.$Node.processes-ruby.ps_rss
+  - Satellite6 Process Memory -> Summerized -> ruby RSS
+-
+  - $Cloud.$Node.processes-dynflow_executor.ps_rss
+  - Satellite6 Process Memory -> Summerized -> dynflow_executor RSS
+-
+  - $Cloud.$Node.processes-postgres.ps_rss
+  - Satellite6 Process Memory -> Summerized -> postgresql RSS
+-
+  - $Cloud.$Node.processes-Tomcat.ps_rss
+  - Satellite6 Process Memory -> Summerized -> tomcat RSS
+-
+  - $Cloud.$Node.processes-qpidd.ps_rss
+  - Satellite6 Process Memory -> Summerized -> qpidd RSS
+-
+  - $Cloud.$Node.processes-qdrouterd.ps_rss
+  - Satellite6 Process Memory -> Summerized -> qdrouterd RSS
+-
+  - scale($Cloud.$Node.processes-httpd.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> httpd User
+-
+  - scale($Cloud.$Node.processes-ruby.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> ruby User
+-
+  - scale($Cloud.$Node.processes-dynflow_executor.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> dynflow_executor User
+-
+  - scale($Cloud.$Node.processes-postgres.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> ruby User
+-
+  - scale($Cloud.$Node.processes-Tomcat.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> tomcat User
+-
+  - scale($Cloud.$Node.processes-qpidd.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> qpidd User
+-
+  - scale($Cloud.$Node.processes-qdrouterd.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> qdrouterd User
+-
+  - $Cloud.$Node.postgresql-candlepin.pg_n_tup_c-del
+  - PostgreSQL -> Candlepin Tuple Operations -> c-del
+-
+  - $Cloud.$Node.postgresql-candlepin.pg_n_tup_c-ins
+  - PostgreSQL -> Candlepin Tuple Operations -> c-ins
+-
+  - $Cloud.$Node.postgresql-candlepin.pg_n_tup_c-upd
+  - PostgreSQL -> Candlepin Tuple Operations -> c-upd
+-
+  - $Cloud.$Node.postgresql-foreman.pg_n_tup_c-del
+  - PostgreSQL -> Foreman Tuple Operations -> c-del
+-
+  - $Cloud.$Node.postgresql-foreman.pg_n_tup_c-ins
+  - PostgreSQL -> Foreman Tuple Operations -> c-ins
+-
+  - $Cloud.$Node.postgresql-foreman.pg_n_tup_c-upd
+  - PostgreSQL -> Foreman Tuple Operations -> c-upd

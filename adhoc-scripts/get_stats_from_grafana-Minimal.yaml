@@ -1,0 +1,22 @@
+---
+-
+  - $Cloud.$Node.load.load.shortterm
+  - Load / Uptime -> C/N - Load Averages -> 1m avg [-]
+-
+  - $Cloud.$Node.memory.memory-used
+  - Memory & Swap -> C/N - Memory -> Used [b]
+-
+  - $Cloud.$Node.swap.swap-used
+  - Memory & Swap -> C/N - Swap -> Used [b]
+-
+  - scale(sum($Cloud.$Node.*.disk_octets.read), 8)
+  - Disk -> C/N - Disk Throughput -> Read [b]
+-
+  - scale(sum($Cloud.$Node.*.disk_octets.write), 8)
+  - Disk -> C/N - Disk Throughput -> Write [b]
+-
+  - scale($Cloud.$Node.$Interface.if_octets.tx, 8)
+  - Network -> C/N - $Interface Throughput -> TX [b]
+-
+  - scale($Cloud.$Node.$Interface.if_octets.rx, 8)
+  - Network -> C/N - $Interface Throughput -> RX [b]

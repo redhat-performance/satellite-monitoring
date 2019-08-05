@@ -1,0 +1,91 @@
+---
+-
+  - sum($Cloud.$Node.processes-rq_resource_manager.ps_count.*)
+  - Pulp3 -> Processes and Threads count -> rq resource manager
+-
+  - sum($Cloud.$Node.processes-rq_workers.ps_count.*)
+  - Pulp3 -> Processes and Threads count -> rq workers
+-
+  - sum($Cloud.$Node.processes-gunicorn.ps_count.*)
+  - Pulp3 -> Processes and Threads count -> gunicorn
+-
+  - sum($Cloud.$Node.processes-nginx.ps_count.*)
+  - Pulp3 -> Processes and Threads count -> nginx
+-
+  - sum($Cloud.$Node.processes-postgres.ps_count.*)
+  - Pulp3 -> Processes and Threads count -> PostgreSQL
+-
+  - sum($Cloud.$Node.processes-redis-server.ps_count.*)
+  - Pulp3 -> Processes and Threads count -> redis-server
+-
+  - sum($Cloud.$Node.processes-rq_resource_manager.ps_cputime.*)
+  - Pulp3 -> CPU usage -> rq resource manager
+-
+  - sum($Cloud.$Node.processes-rq_workers.ps_cputime.*)
+  - Pulp3 -> CPU usage -> rq workers
+-
+  - sum($Cloud.$Node.processes-gunicorn.ps_cputime.*)
+  - Pulp3 -> CPU usage -> gunicorn
+-
+  - sum($Cloud.$Node.processes-nginx.ps_cputime.*)
+  - Pulp3 -> CPU usage -> nginx
+-
+  - sum($Cloud.$Node.processes-postgres.ps_cputime.*)
+  - Pulp3 -> CPU usage -> PostgreSQL
+-
+  - sum($Cloud.$Node.processes-redis-server.ps_cputime.*)
+  - Pulp3 -> CPU usage -> redis-server
+-
+  - $Cloud.$Node.processes-rq_resource_manager.ps_rss
+  - Pulp3 -> RSS memory use -> rq resource manager
+-
+  - $Cloud.$Node.processes-rq_workers.ps_rss
+  - Pulp3 -> RSS memory use -> rq workers
+-
+  - $Cloud.$Node.processes-gunicorn.ps_rss
+  - Pulp3 -> RSS memory use -> gunicorn
+-
+  - $Cloud.$Node.processes-nginx.ps_rss
+  - Pulp3 -> RSS memory use -> nginx
+-
+  - $Cloud.$Node.processes-postgres.ps_rss
+  - Pulp3 -> RSS memory use -> PostgreSQL
+-
+  - $Cloud.$Node.processes-redis-server.ps_rss
+  - Pulp3 -> RSS memory use -> redis-server
+-
+  - sum($Cloud.$Node.processes-rq_resource_manager.disk_octets.*)
+  - Pulp3 -> Disk usage -> rq resource manager
+-
+  - sum($Cloud.$Node.processes-rq_workers.disk_octets.*)
+  - Pulp3 -> Disk usage -> rq workers
+-
+  - sum($Cloud.$Node.processes-gunicorn.disk_octets.*)
+  - Pulp3 -> Disk usage -> gunicorn
+-
+  - sum($Cloud.$Node.processes-nginx.disk_octets.*)
+  - Pulp3 -> Disk usage -> nginx
+-
+  - sum($Cloud.$Node.processes-postgres.disk_octets.*)
+  - Pulp3 -> Disk usage -> PostgreSQL
+-
+  - sum($Cloud.$Node.processes-redis-server.disk_octets.*)
+  - Pulp3 -> Disk usage -> redis-server
+-
+  - sum($Cloud.$Node.processes-rq_resource_manager.io_octets.*)
+  - Pulp3 -> Network IO usage -> rq resource manager
+-
+  - sum($Cloud.$Node.processes-rq_workers.io_octets.*)
+  - Pulp3 -> Network IO usage -> rq workers
+-
+  - sum($Cloud.$Node.processes-gunicorn.io_octets.*)
+  - Pulp3 -> Network IO usage -> gunicorn
+-
+  - sum($Cloud.$Node.processes-nginx.io_octets.*)
+  - Pulp3 -> Network IO usage -> nginx
+-
+  - sum($Cloud.$Node.processes-postgres.io_octets.*)
+  - Pulp3 -> Network IO usage -> PostgreSQL
+-
+  - sum($Cloud.$Node.processes-redis-server.io_octets.*)
+  - Pulp3 -> Network IO usage -> redis-server

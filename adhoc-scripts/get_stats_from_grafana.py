@@ -10,6 +10,7 @@ import scipy.integrate
 import numpy
 import tabulate
 import json
+import yaml
 import csv
 
 _si_prefixes = [
@@ -47,6 +48,9 @@ parser.add_argument('--interface', default='interface-em1',
                     help='Monitored host network interface name in Graphite')
 parser.add_argument('--file', default='/tmp/get_stats_from_grafana.json',
                     help='Save stats to this file')
+parser.add_argument('--metrices', nargs='+', type=argparse.FileType('r'),
+                    default='get_stats_from_grafana-Minimal.yaml',
+                    help='yaml files with metrices to display')
 parser.add_argument('--beauty', action='store_true',
                     help='Output numbers in format with k, M, G and T')
 parser.add_argument('--csv', action='store_true',
@@ -61,73 +65,9 @@ if args.debug:
 logging.debug("Arguments: %s" % args)
 
 # Metrics we are interested in and their aliases
-targets = [
-    ("$Cloud.$Node.load.load.shortterm", "Load / Uptime -> C/N - Load Averages -> 1m avg [-]"),
-    ("$Cloud.$Node.memory.memory-used", "Memory & Swap -> C/N - Memory -> Used [b]"),
-    ("$Cloud.$Node.swap.swap-used", "Memory & Swap -> C/N - Swap -> Used [b]"),
-    ("scale(sum($Cloud.$Node.*.disk_octets.read), 8)", "Disk -> C/N - Disk Throughput -> Read [b]"),
-    ("scale(sum($Cloud.$Node.*.disk_octets.write), 8)", "Disk -> C/N - Disk Throughput -> Write [b]"),
-    ("scale($Cloud.$Node.$Interface.if_octets.tx, 8)", "Network -> C/N - $Interface Throughput -> TX [b]"),
-    ("scale($Cloud.$Node.$Interface.if_octets.rx, 8)", "Network -> C/N - $Interface Throughput -> RX [b]"),
-
-    ("$Cloud.$Node.processes-httpd.ps_rss", "Satellite6 Process Memory -> Summerized -> httpd RSS"),
-    ("$Cloud.$Node.processes-ruby.ps_rss", "Satellite6 Process Memory -> Summerized -> ruby RSS"),
-    ("$Cloud.$Node.processes-dynflow_executor.ps_rss", "Satellite6 Process Memory -> Summerized -> dynflow_executor RSS"),
-    ("$Cloud.$Node.processes-postgres.ps_rss", "Satellite6 Process Memory -> Summerized -> postgresql RSS"),
-    ("$Cloud.$Node.processes-Tomcat.ps_rss", "Satellite6 Process Memory -> Summerized -> tomcat RSS"),
-    ("$Cloud.$Node.processes-qpidd.ps_rss", "Satellite6 Process Memory -> Summerized -> qpidd RSS"),
-    ("$Cloud.$Node.processes-qdrouterd.ps_rss", "Satellite6 Process Memory -> Summerized -> qdrouterd RSS"),
-
-    ("scale($Cloud.$Node.processes-httpd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> httpd User"),
-    ("scale($Cloud.$Node.processes-ruby.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> ruby User"),
-    ("scale($Cloud.$Node.processes-dynflow_executor.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> dynflow_executor User"),
-    ("scale($Cloud.$Node.processes-postgres.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> ruby User"),
-    ("scale($Cloud.$Node.processes-Tomcat.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> tomcat User"),
-    ("scale($Cloud.$Node.processes-qpidd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> qpidd User"),
-    ("scale($Cloud.$Node.processes-qdrouterd.ps_cputime.user, 0.0001)", "Satellite6 Process CPU -> Summerized -> qdrouterd User"),
-
-    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-del", "PostgreSQL -> Candlepin Tuple Operations -> c-del"),
-    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-ins", "PostgreSQL -> Candlepin Tuple Operations -> c-ins"),
-    ("$Cloud.$Node.postgresql-candlepin.pg_n_tup_c-upd", "PostgreSQL -> Candlepin Tuple Operations -> c-upd"),
-    ("$Cloud.$Node.postgresql-foreman.pg_n_tup_c-del", "PostgreSQL -> Foreman Tuple Operations -> c-del"),
-    ("$Cloud.$Node.postgresql-foreman.pg_n_tup_c-ins", "PostgreSQL -> Foreman Tuple Operations -> c-ins"),
-    ("$Cloud.$Node.postgresql-foreman.pg_n_tup_c-upd", "PostgreSQL -> Foreman Tuple Operations -> c-upd"),
-
-    ("sum($Cloud.$Node.processes-rq_resource_manager.ps_count.*)", "Pulp3 -> Processes and Threads count -> rq resource manager"),
-    ("sum($Cloud.$Node.processes-rq_workers.ps_count.*)", "Pulp3 -> Processes and Threads count -> rq workers"),
-    ("sum($Cloud.$Node.processes-gunicorn.ps_count.*)", "Pulp3 -> Processes and Threads count -> gunicorn"),
-    ("sum($Cloud.$Node.processes-nginx.ps_count.*)", "Pulp3 -> Processes and Threads count -> nginx"),
-    ("sum($Cloud.$Node.processes-postgres.ps_count.*)", "Pulp3 -> Processes and Threads count -> PostgreSQL"),
-    ("sum($Cloud.$Node.processes-redis-server.ps_count.*)", "Pulp3 -> Processes and Threads count -> redis-server"),
-
-    ("sum($Cloud.$Node.processes-rq_resource_manager.ps_cputime.*)", "Pulp3 -> CPU usage -> rq resource manager"),
-    ("sum($Cloud.$Node.processes-rq_workers.ps_cputime.*)", "Pulp3 -> CPU usage -> rq workers"),
-    ("sum($Cloud.$Node.processes-gunicorn.ps_cputime.*)", "Pulp3 -> CPU usage -> gunicorn"),
-    ("sum($Cloud.$Node.processes-nginx.ps_cputime.*)", "Pulp3 -> CPU usage -> nginx"),
-    ("sum($Cloud.$Node.processes-postgres.ps_cputime.*)", "Pulp3 -> CPU usage -> PostgreSQL"),
-    ("sum($Cloud.$Node.processes-redis-server.ps_cputime.*)", "Pulp3 -> CPU usage -> redis-server"),
-
-    ("$Cloud.$Node.processes-rq_resource_manager.ps_rss", "Pulp3 -> RSS memory use -> rq resource manager"),
-    ("$Cloud.$Node.processes-rq_workers.ps_rss", "Pulp3 -> RSS memory use -> rq workers"),
-    ("$Cloud.$Node.processes-gunicorn.ps_rss", "Pulp3 -> RSS memory use -> gunicorn"),
-    ("$Cloud.$Node.processes-nginx.ps_rss", "Pulp3 -> RSS memory use -> nginx"),
-    ("$Cloud.$Node.processes-postgres.ps_rss", "Pulp3 -> RSS memory use -> PostgreSQL"),
-    ("$Cloud.$Node.processes-redis-server.ps_rss", "Pulp3 -> RSS memory use -> redis-server"),
-
-    ("sum($Cloud.$Node.processes-rq_resource_manager.disk_octets.*)", "Pulp3 -> Disk usage -> rq resource manager"),
-    ("sum($Cloud.$Node.processes-rq_workers.disk_octets.*)", "Pulp3 -> Disk usage -> rq workers"),
-    ("sum($Cloud.$Node.processes-gunicorn.disk_octets.*)", "Pulp3 -> Disk usage -> gunicorn"),
-    ("sum($Cloud.$Node.processes-nginx.disk_octets.*)", "Pulp3 -> Disk usage -> nginx"),
-    ("sum($Cloud.$Node.processes-postgres.disk_octets.*)", "Pulp3 -> Disk usage -> PostgreSQL"),
-    ("sum($Cloud.$Node.processes-redis-server.disk_octets.*)", "Pulp3 -> Disk usage -> redis-server"),
-
-    ("sum($Cloud.$Node.processes-rq_resource_manager.io_octets.*)", "Pulp3 -> Network IO usage -> rq resource manager"),
-    ("sum($Cloud.$Node.processes-rq_workers.io_octets.*)", "Pulp3 -> Network IO usage -> rq workers"),
-    ("sum($Cloud.$Node.processes-gunicorn.io_octets.*)", "Pulp3 -> Network IO usage -> gunicorn"),
-    ("sum($Cloud.$Node.processes-nginx.io_octets.*)", "Pulp3 -> Network IO usage -> nginx"),
-    ("sum($Cloud.$Node.processes-postgres.io_octets.*)", "Pulp3 -> Network IO usage -> PostgreSQL"),
-    ("sum($Cloud.$Node.processes-redis-server.io_octets.*)", "Pulp3 -> Network IO usage -> redis-server"),
-]
+targets = []
+for fp in args.metrices:
+    targets += yaml.load(fp, Loader=yaml.SafeLoader)
 logging.debug("Metrics: %s" % targets)
 
 def sanitize_target(target):
