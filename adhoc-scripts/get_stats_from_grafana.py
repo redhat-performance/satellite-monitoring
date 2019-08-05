@@ -18,7 +18,6 @@ _si_prefixes = [
     ('G', 1e9),    # giga
     ('M', 1e6),    # mega
     ('k', 1e3),    # kilo
-    ('', 1),       # no deal
     ('m', 1e-3),   # mili
     ('u', 1e-6),   # micro
     ('n', 1e-9),   # nano
@@ -114,7 +113,7 @@ def reformat_number_list(data):
         if isinstance(i, int) or isinstance(i, float):
             reformated = False
             for prefix in _si_prefixes:
-                if i >= prefix[1]:
+                if (i > 99 or i < 0.1) and i >= prefix[1]:
                     out.append("%.02f %s" % (float(i)/prefix[1], prefix[0]))
                     reformated = True
                     break
