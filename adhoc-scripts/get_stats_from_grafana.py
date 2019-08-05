@@ -12,6 +12,18 @@ import tabulate
 import json
 import csv
 
+_si_prefixes = [
+    ('T', 1e12),   # tera
+    ('G', 1e9),    # giga
+    ('M', 1e6),    # mega
+    ('k', 1e3),    # kilo
+    ('', 1),       # no deal
+    ('m', 1e-3),   # mili
+    ('u', 1e-6),   # micro
+    ('n', 1e-9),   # nano
+    ('p', 1e-12),  # pico
+]
+
 parser = argparse.ArgumentParser(description='Get stats from Graphite/Grafana for given interval')
 parser.add_argument('from_ts', type=int,
                     help='timestamp (UTC) of start of the interval')
@@ -35,6 +47,8 @@ parser.add_argument('--interface', default='interface-em1',
                     help='Monitored host network interface name in Graphite')
 parser.add_argument('--file', default='/tmp/get_stats_from_grafana.json',
                     help='Save stats to this file')
+parser.add_argument('--beauty', action='store_true',
+                    help='Output numbers in format with k, M, G and T')
 parser.add_argument('--csv', action='store_true',
                     help='Output data table to stdout in csv (defauts to table)')
 parser.add_argument('--debug', action='store_true',
@@ -117,6 +131,24 @@ def get_data(targets, args):
         data += r.json()
     return data
 
+def reformat_number_list(data):
+    if not args.beauty:
+        return data
+    out = []
+    for i in data:
+        if isinstance(i, int) or isinstance(i, float):
+            reformated = False
+            for prefix in _si_prefixes:
+                if i >= prefix[1]:
+                    out.append("%.02f %s" % (float(i)/prefix[1], prefix[0]))
+                    reformated = True
+                    break
+            if not reformated:
+                out.append("%.02f" % i)
+        else:
+            out.append(i)
+    return out
+
 def get_hist(data):
     hist_counts, hist_borders = numpy.histogram(data)
     hist_counts = [float(i) for i in hist_counts]
@@ -151,9 +183,11 @@ for d in data:
     d_pstdev = statistics.pstdev(d_plain)
     d_pvariance = statistics.pvariance(d_plain)
     d_hist = get_hist(d_plain)
-    table_row = [d['target'], d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_hist, d_duration, d_len]
+    table_row_data = [d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_hist, d_duration, d_len]
+    file_row = [d['target']] + table_row_data
+    table_row = [d['target']] + reformat_number_list(table_row_data)
     table_data.append(table_row)
-    file_data[d['target']] = {table_header[i]:table_row[i] for i in range(len(table_header))}
+    file_data[d['target']] = {table_header[i]:file_row[i] for i in range(len(table_header))}
 
 if args.csv:
     spamwriter = csv.writer(sys.stdout)
