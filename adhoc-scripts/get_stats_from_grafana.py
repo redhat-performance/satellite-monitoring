@@ -52,6 +52,8 @@ parser.add_argument('--metrices', nargs='+', type=argparse.FileType('r'),
                     help='yaml files with metrices to display')
 parser.add_argument('--beauty', action='store_true',
                     help='Output numbers in format with k, M, G and T')
+parser.add_argument('--only', default=None,
+                    help='Only print these (coma separated) columns')
 parser.add_argument('--csv', action='store_true',
                     help='Output data table to stdout in csv (defauts to table)')
 parser.add_argument('--debug', action='store_true',
@@ -163,14 +165,25 @@ for d in data:
     table_data.append(table_row)
     file_data[d['target']] = {table_header[i]:file_row[i] for i in range(len(table_header))}
 
+# Remove columns we do not want to show
+if args.only is not None:
+    only_columns = args.only.split(',')
+    show_columns = set(table_header) - set(only_columns)
+    for column in show_columns:
+        column_id = table_header.index(column)
+        table_header.remove(column)
+        for row in table_data:
+            del(row[column_id])
+
 if args.csv:
     spamwriter = csv.writer(sys.stdout)
     spamwriter.writerow(table_header)
     spamwriter.writerows(table_data)
 else:
-    hist_id = table_header.index('histogram')
-    for row in table_data:
-        row[hist_id] = reformat_hist(row[hist_id])
+    if 'histogram' in table_header:
+        hist_id = table_header.index('histogram')
+        for row in table_data:
+            row[hist_id] = reformat_hist(row[hist_id])
     print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
 
 with open(args.file, 'w') as fp:
