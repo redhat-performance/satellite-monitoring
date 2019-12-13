@@ -1,0 +1,187 @@
+---
+- hosts: hosts
+  remote_user: root
+  gather_facts: no
+  tasks:
+   - name: enable optional repos & install PCP packages
+     shell: "{{ item }}"
+     with_items:
+      - subscription-manager repos --enable rhel-7-server-optional-rpms
+      - yum install pcp pcp-pmda-apache pcp-pmda-postgresql pcp-system-tools pcp-webjs -y
+
+   - name: enable & start pmcd,pmlogger daemons
+     service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+     with_items:
+      - pmcd
+      - pmlogger
+
+   - name: create a file with content
+     copy:
+      dest: /var/lib/pcp/pmdas/proc/hotproc.conf
+      content: |
+                #pmdahotproc
+                Version 1.0
+
+                # processes with load 0.9 or 1GB RSS memory
+                (cpuburn > 0.9 || residentsize > 1000000) &&
+                (
+                  fname == "java" ||
+                  fname == "qdrouterd" ||
+                  fname == "qpidd" ||
+                  (fname == "postgres" && psargs ~ /-D/) ||
+                  fname == "mongod" ||
+                  fname == "dynflow_executor" ||
+                  fname == "dynflow_executor_monitor" ||
+                  fname ~ /smart_proxy_dynflow_core/ ||
+                  psargs ~ /Passenger RackApp/ ||
+                  psargs ~ /celery beat/ ||
+                  psargs ~ /celery worker/ ||
+                  psargs ~ /pulp/ ||
+                  psargs ~ /smart-proxy/ ||
+                  psargs ~ /squid.conf/
+                )"
+        
+   - name: create a new dir to configure PCP to log the process metrics     
+     file:
+      path: /var/lib/pcp/config/pmlogconf/foreman-hotproc
+      state: directory
+      mode: 0777
+    
+   - name: create a file for summary 
+     copy:
+      dest: /var/lib/pcp/config/pmlogconf/foreman-hotproc/summary
+      content: |
+                  #pmlogconf-setup 2.0
+                  ident   foreman hotproc metrics
+                  probe   hotproc.control.config != "" ? include : exclude
+                          hotproc.psinfo.psargs
+                          hotproc.psinfo.cnswap
+                          hotproc.psinfo.nswap
+                          hotproc.psinfo.rss
+                          hotproc.psinfo.vsize
+                          hotproc.psinfo.cstime
+                          hotproc.psinfo.cutime
+                          hotproc.psinfo.stime
+                          hotproc.psinfo.utime
+                          hotproc.io.write_byteslt.changed == false"
+                          hotproc.io.read_bytes
+                          hotproc.schedstat.cpu_time
+                          hotproc.fd.count
+
+   - name: install the process monitoring PMDA
+     shell: cd /var/lib/pcp/pmdas/proc ; ./Install
+
+   - name: enable Apache HTTP Server extended status module
+     copy: 
+      dest: /etc/httpd/conf.d/01-status.conf
+      content: |
+                  ExtendedStatus On
+                  LoadModule status_module modules/mod_status.so
+                  <Location "/server-status">
+                  PassengerEnabled off
+                  SetHandler server-status
+                  Order deny,allow
+                  Deny from all
+                  Allow from localhost
+                  </Location>
+
+   - name: enable the Apache HTTP Server PMDA
+     shell: cd /var/lib/pcp/pmdas/apache ; echo | ./Install
+  
+   - name: add a line to prevent the sat installer overwriting the extended status module  
+     lineinfile: 
+      path: /etc/foreman-installer/custom-hiera.yaml
+      line: 'apache::purge_configs: false'
+
+   - name: configure PCP to collect metrics from PostgreSQL
+     shell: "{{ item }}"
+     with_items:
+      - cd /var/lib/pcp/pmdas/postgresql ; ./Install
+      - semanage permissive -a pcp_pmcd_t
+      - yum install foreman-telemetry pcp-mmvstatsd -y 
+
+   - name: copy the database file file from the remote host to the controller
+     slurp:
+      src: /etc/foreman/database.yml
+     register: result
+
+   - name: copy the stored contents
+     copy:
+      content: "{{ result['content'] |  b64decode }}"
+      dest: ~/copy_file.yaml
+     delegate_to: localhost
+
+   - include_vars: ~/copy_file.yaml
+
+   - name: configure the PCP database interface to permit access to the PostgreSQL database
+     copy: 
+      dest: /etc/pcpdbi.conf
+      content: |
+                 $database = "dbi:Pg:dbname=foreman;host=localhost";
+                 $username = "foreman";
+                 $password = "{{ production.password }}";
+                 $os_user = "foreman";
+
+
+   - name: enable pcp-mmvstatsd daemons
+     service:
+      name: pcp-mmvstatsd
+      enabled: yes
+      state: started
+
+   - name: enable the Satellite telemetry functionality
+     copy: 
+      dest: /etc/foreman/settings.yaml
+      content: |
+                  :telemetry:
+                  :prefix: 'fm_rails'
+                  :statsd:
+                    :enabled: true
+                    :host: '127.0.0.1:8125'
+                    :protocol: 'statsd'
+                  :prometheus:
+                    :enabled: false
+                  :logger:
+                    :enabled: false
+                    :level: 'INFO'
+
+   - name: schedule daily storage of metrics in archive files                   
+     copy:
+      dest: /etc/cron.daily/refresh_mmv
+      content: |
+                  #!/bin/bash
+                  echo "log mandatory on 1 minute mmv" | /usr/bin/pmlc -P
+   
+   - name: change the permissons  
+     shell: chmod +x /etc/cron.daily/refresh_mmv
+
+   - name: restart httpd pmcd pmlogger the services
+     service:
+      name: "{{ item }}"
+      state: restarted
+     with_items:
+       - httpd
+       - pmcd
+       - pmlogger
+
+   - name: PCP web API and applications
+     shell: yum  install pcp-webapi pcp-webapp-grafana pcp-webapp-vector -y
+
+   - name: enable pmwebd daemons
+     service:
+      name: pmwebd
+      enabled: yes
+
+   - name: start the services
+     service:
+      name: "{{ item }}"
+      state: started
+     with_items:
+      - pmwebd
+      - firewalld
+
+   - name: open firewall port to allow access to the PCP web service
+     shell: firewall-cmd --add-port=44323/tcp ; firewall-cmd --permanent --add-port=44323/tcp
