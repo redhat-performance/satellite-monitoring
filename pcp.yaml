@@ -3,6 +3,9 @@
   remote_user: root
   gather_facts: no
   tasks:
+   - name: unlock the packages
+     shell: foreman-maintain packages unlock
+     
    - name: enable optional repos & install PCP packages
      shell: "{{ item }}"
      with_items:
