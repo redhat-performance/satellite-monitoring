@@ -141,22 +141,16 @@ def reformat_hist(data):
     if not args.beauty_hist:
         return ','.join(["%d" % i[1] for i in data])
     else:
-        print()
-        print()
-        print()
         scale = "▁▂▃▄▅▆▇"   # " " not included so we can see where is the histogram and "█" not included so we have some space from hist in the row above
         scale_count = len(scale)
         hist_values = [i[1] for i in data]
         hist_min = min(hist_values)
         hist_max = max(hist_values)
         step = (hist_max - hist_min) / scale_count
-        print(">>>",hist_values, hist_min, hist_max, step)
         hist = ""
         for item in hist_values:
             for bucket in range(scale_count):
-                print(">>> >>>", hist_min + step*bucket, item, hist_min + step * (bucket+1))
                 if hist_min + step * bucket <= item <= hist_min + step * (bucket + 1):
-                    print(">>> >>> >>>", item, bucket, scale[bucket])
                     hist += scale[bucket]
                     break
         return "[" + hist + "]"
