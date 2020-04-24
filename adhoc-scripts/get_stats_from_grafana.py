@@ -52,6 +52,8 @@ parser.add_argument('--metrices', nargs='+', type=argparse.FileType('r'),
                     help='yaml files with metrices to display')
 parser.add_argument('--beauty', action='store_true',
                     help='Output numbers in format with k, M, G and T')
+parser.add_argument('--beauty-hist', action='store_true',
+                    help='Output histogram if any as fancy UTF-8 graph')
 parser.add_argument('--only', default=None,
                     help='Only print these (coma separated) columns')
 parser.add_argument('--csv', action='store_true',
@@ -136,7 +138,28 @@ def get_hist(data):
 
 def reformat_hist(data):
     #return ','.join(["%.2f-%.2f:%d" % (i[0][0], i[0][1], i[1]) for i in data])
-    return ','.join(["%d" % i[1] for i in data])
+    if not args.beauty_hist:
+        return ','.join(["%d" % i[1] for i in data])
+    else:
+        print()
+        print()
+        print()
+        scale = "▁▂▃▄▅▆▇"   # " " not included so we can see where is the histogram and "█" not included so we have some space from hist in the row above
+        scale_count = len(scale)
+        hist_values = [i[1] for i in data]
+        hist_min = min(hist_values)
+        hist_max = max(hist_values)
+        step = (hist_max - hist_min) / scale_count
+        print(">>>",hist_values, hist_min, hist_max, step)
+        hist = ""
+        for item in hist_values:
+            for bucket in range(scale_count):
+                print(">>> >>>", hist_min + step*bucket, item, hist_min + step * (bucket+1))
+                if hist_min + step * bucket <= item <= hist_min + step * (bucket + 1):
+                    print(">>> >>> >>>", item, bucket, scale[bucket])
+                    hist += scale[bucket]
+                    break
+        return "[" + hist + "]"
 
 data = get_data(targets, args)
 
