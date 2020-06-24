@@ -126,11 +126,7 @@ LoadPlugin apache
 
 <Plugin processes>
   # DynFlow
-  ProcessMatch "dynflow_executor" "dynflow.+executor$"
-  ProcessMatch "dynflow_executor_monitor" "dynflow.+executor.+monitor$"
-
-  # Elasticsearch
-  ProcessMatch "Elasticsearch" ".*elasticsearch.*"
+  ProcessMatch "dynflow" "dynflow.*"
 
   # Apache
   Process "httpd"
@@ -165,6 +161,7 @@ LoadPlugin apache
 
   # Squid
   Process "squid"
+
   # Tomcat
   ProcessMatch "Tomcat" ".*tomcat.*"
 
