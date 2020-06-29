@@ -6,8 +6,8 @@
   - $Cloud.$Node.processes-ruby.ps_rss
   - Satellite6 Process Memory -> Summerized -> ruby RSS
 -
-  - $Cloud.$Node.processes-dynflow_executor.ps_rss
-  - Satellite6 Process Memory -> Summerized -> dynflow_executor RSS
+  - $Cloud.$Node.processes-dynflow.ps_rss
+  - Satellite6 Process Memory -> Summerized -> dynflow RSS
 -
   - $Cloud.$Node.processes-postgres.ps_rss
   - Satellite6 Process Memory -> Summerized -> postgres RSS
@@ -30,8 +30,8 @@
   - scale($Cloud.$Node.processes-ruby.ps_cputime.user, 0.0001)
   - Satellite6 Process CPU -> Summerized -> ruby User
 -
-  - scale($Cloud.$Node.processes-dynflow_executor.ps_cputime.user, 0.0001)
-  - Satellite6 Process CPU -> Summerized -> dynflow_executor User
+  - scale($Cloud.$Node.processes-dynflow.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> dynflow User
 -
   - scale($Cloud.$Node.processes-postgres.ps_cputime.user, 0.0001)
   - Satellite6 Process CPU -> Summerized -> postgres User
