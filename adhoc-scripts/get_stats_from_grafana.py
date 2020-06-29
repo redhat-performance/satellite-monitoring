@@ -167,15 +167,24 @@ for d in data:
     d_len = len(d_plain)
     if d_len < 5:
         logging.warning('Very low number of datapoints returned for %s: %s' % (d['target'], d_len))
-
-    d_min = min(d_plain)
-    d_max = max(d_plain)
-    d_mean = statistics.mean(d_plain)
-    d_median = statistics.median(d_plain)
-    d_integral = scipy.integrate.simps(d_plain, d_timestamps) / d_duration
-    d_pstdev = statistics.pstdev(d_plain)
-    d_pvariance = statistics.pvariance(d_plain)
-    d_hist = get_hist(d_plain)
+    if len(d_plain) > 0:
+        d_min = min(d_plain)
+        d_max = max(d_plain)
+        d_mean = statistics.mean(d_plain)
+        d_median = statistics.median(d_plain)
+        d_integral = scipy.integrate.simps(d_plain, d_timestamps) / d_duration
+        d_pstdev = statistics.pstdev(d_plain)
+        d_pvariance = statistics.pvariance(d_plain)
+        d_hist = get_hist(d_plain)
+    else:
+        d_min = 0
+        d_max = 0
+        d_mean = 0
+        d_median = 0
+        d_integral = 0
+        d_pstdev = 0
+        d_pvariance = 0
+        d_hist = {(0, 0): 0}
     table_row_data = [d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_hist, d_duration, d_len]
     file_row = [d['target']] + table_row_data
     table_row = [d['target']] + reformat_number_list(table_row_data)
