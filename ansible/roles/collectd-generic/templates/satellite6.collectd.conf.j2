@@ -126,7 +126,7 @@ LoadPlugin apache
 
 <Plugin processes>
   # DynFlow
-  ProcessMatch "dynflow" "dynflow.*"
+  ProcessMatch "dynflow" "(dynflow.*|sidekiq.*)"
 
   # Apache
   Process "httpd"
