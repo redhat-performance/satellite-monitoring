@@ -155,6 +155,13 @@ def reformat_hist(data):
                     break
         return "[" + hist + "]"
 
+def reformat_hist_in_data_for_json(data, hist_id):
+    data = data[:]
+    if isinstance(data[hist_id], dict):
+        data[hist_id] = data[hist_id].items()
+    data[hist_id] = {str("%s - %s" % k): "%.02f" % v for k, v in data[hist_id]}
+    return data
+
 data = get_data(targets, args)
 
 table_header = ['metric', 'min', 'max', 'mean', 'median', 'int_per_dur', 'pstdev', 'pvariance', 'histogram', 'duration', 'datapoints']
@@ -186,7 +193,7 @@ for d in data:
         d_pvariance = 0
         d_hist = {(0, 0): 0}
     table_row_data = [d_min, d_max, d_mean, d_median, d_integral, d_pstdev, d_pvariance, d_hist, d_duration, d_len]
-    file_row = [d['target']] + table_row_data
+    file_row = [d['target']] + reformat_hist_in_data_for_json(table_row_data, 7)
     table_row = [d['target']] + reformat_number_list(table_row_data)
     table_data.append(table_row)
     file_data[d['target']] = {table_header[i]:file_row[i] for i in range(len(table_header))}
@@ -213,5 +220,6 @@ else:
     print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
 
 with open(args.file, 'w') as fp:
+    import pprint; pprint.pprint(file_data)
     json.dump(file_data, fp, indent=4)
     logging.info("Stats saved into %s" % args.file)
