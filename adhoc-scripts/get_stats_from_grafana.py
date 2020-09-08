@@ -220,6 +220,5 @@ else:
     print(tabulate.tabulate(table_data, headers=table_header, floatfmt='.2f'))
 
 with open(args.file, 'w') as fp:
-    import pprint; pprint.pprint(file_data)
     json.dump(file_data, fp, indent=4)
     logging.info("Stats saved into %s" % args.file)
