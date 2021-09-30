@@ -148,6 +148,9 @@ LoadPlugin apache
   ProcessMatch "Pulp-Scheduler" "/usr/bin/python.+/usr/bin/celery.+beat.+--scheduler=pulp.server.async.scheduler.Scheduler"
   ProcessMatch "Pulp-Resource-Manager" "/usr/bin/python.+/usr/bin/celery.+worker.+-A.+pulp.server.async.app.+-n.+resource_manager"
   ProcessMatch "Pulp-Resource-Worker" "/usr/bin/python.+/usr/bin/celery.+worker.+-n.+reserved_resource_worker"
+  
+  # Puma workers
+  ProcessMatch "Puma-Worker" "puma: cluster worker .*"
 
   # Puppet Agent
   ProcessMatch "Puppet-Agent" "/usr/bin/ruby.+/usr/bin/puppet.+agent.+--no-daemonize"
