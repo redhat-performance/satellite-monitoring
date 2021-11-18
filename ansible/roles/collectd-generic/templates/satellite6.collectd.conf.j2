@@ -134,7 +134,7 @@ LoadPlugin apache
   # Mongodb
   Process "mongod"
 
-  # Passenger
+  # Passenger - not in sat 6.9 onwards
   ProcessMatch "Passenger-Forman" "Passenger.+RackApp:.+/usr/share/foreman"
   ProcessMatch "Passenger-Puppet" "Passenger.+RackApp:.+/etc/puppet/rack"
   ProcessMatch "PassengerHelperAgent" "PassengerHelperAgent"
@@ -148,12 +148,19 @@ LoadPlugin apache
   ProcessMatch "Pulp-Scheduler" "/usr/bin/python.+/usr/bin/celery.+beat.+--scheduler=pulp.server.async.scheduler.Scheduler"
   ProcessMatch "Pulp-Resource-Manager" "/usr/bin/python.+/usr/bin/celery.+worker.+-A.+pulp.server.async.app.+-n.+resource_manager"
   ProcessMatch "Pulp-Resource-Worker" "/usr/bin/python.+/usr/bin/celery.+worker.+-n.+reserved_resource_worker"
-  
+  # Pulp in sat6.10
+  ProcessMatch "Pulpcore-Content-Server" "/usr/bin/python.+/usr/bin/gunicorn.+pulpcore.content:server"
+  ProcessMatch "Pulpcore-Worker" "/usr/bin/python.+/usr/bin/pulpcore-worker"
+  ProcessMatch "Pulpcore-app-wsgi" "/usr/bin/python.+/usr/bin/gunicorn.+pulpcore.app.wsgi:application"
+
   # Puma workers
   ProcessMatch "Puma-Worker" "puma: cluster worker .*"
 
   # Puppet Agent
+  # < sat 6.9 ?
   ProcessMatch "Puppet-Agent" "/usr/bin/ruby.+/usr/bin/puppet.+agent.+--no-daemonize"
+  # >= sat 6.9
+  ProcessMatch "Puppet-Agent" "/opt/puppetlabs/puppet/bin/ruby.+/opt/puppetlabs/puppet/bin/puppet.+agent.+--no-daemonize"
 
   # Qpidd + dispatch router
   Process "qdrouterd"
@@ -161,6 +168,9 @@ LoadPlugin apache
 
   # Foreman smart proxy
   ProcessMatch "Foreman-SmartProxy" "ruby.+/usr/share/foreman-proxy/bin/smart-proxy"
+
+  # Redis
+  Process "redis" "/opt/rh/rh-redis5/root/usr/bin/redis-server"
 
   # Squid
   Process "squid"
