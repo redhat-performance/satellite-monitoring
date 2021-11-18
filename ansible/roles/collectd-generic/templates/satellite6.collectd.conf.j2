@@ -160,7 +160,7 @@ LoadPlugin apache
   # < sat 6.9 ?
   ProcessMatch "Puppet-Agent" "/usr/bin/ruby.+/usr/bin/puppet.+agent.+--no-daemonize"
   # >= sat 6.9
-  ProcessMatch "Puppet-Agent" "/opt/puppetlabs/puppet/bin/ruby.+/opt/puppetlabs/puppet/bin/puppet.+agent.+--no-daemonize"
+  ProcessMatch "Puppet-Agent-6-9" "/opt/puppetlabs/puppet/bin/ruby.+/opt/puppetlabs/puppet/bin/puppet.+agent.+--no-daemonize"
 
   # Qpidd + dispatch router
   Process "qdrouterd"
@@ -170,7 +170,7 @@ LoadPlugin apache
   ProcessMatch "Foreman-SmartProxy" "ruby.+/usr/share/foreman-proxy/bin/smart-proxy"
 
   # Redis
-  Process "redis" "/opt/rh/rh-redis5/root/usr/bin/redis-server"
+  Process "redis" ".*redis.*"
 
   # Squid
   Process "squid"
