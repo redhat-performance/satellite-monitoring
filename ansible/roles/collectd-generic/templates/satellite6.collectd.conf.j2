@@ -157,10 +157,7 @@ LoadPlugin apache
   ProcessMatch "Puma-Worker" "puma: cluster worker .*"
 
   # Puppet Agent
-  # < sat 6.9 ?
-  ProcessMatch "Puppet-Agent" "/usr/bin/ruby.+/usr/bin/puppet.+agent.+--no-daemonize"
-  # >= sat 6.9
-  ProcessMatch "Puppet-Agent-6-9" "/opt/puppetlabs/puppet/bin/ruby.+/opt/puppetlabs/puppet/bin/puppet.+agent.+--no-daemonize"
+  ProcessMatch "Puppet-Agent" ".*puppet.+agent.+--no-daemonize"
 
   # Qpidd + dispatch router
   Process "qdrouterd"
