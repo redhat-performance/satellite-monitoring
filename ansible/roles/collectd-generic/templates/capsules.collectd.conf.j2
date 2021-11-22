@@ -103,9 +103,13 @@ LoadPlugin apache
   ProcessMatch "Pulp-Scheduler" "/usr/bin/python.+/usr/bin/celery.+beat.+--scheduler=pulp.server.async.scheduler.Scheduler"
   ProcessMatch "Pulp-Resource-Manager" "/usr/bin/python.+/usr/bin/celery.+worker.+-A.+pulp.server.async.app.+-n.+resource_manager"
   ProcessMatch "Pulp-Resource-Worker" "/usr/bin/python.+/usr/bin/celery.+worker.+-n.+reserved_resource_worker"
+  # Pulp in sat6.10
+  ProcessMatch "Pulpcore-Content-Server" "/usr/bin/python.+/usr/bin/gunicorn.+pulpcore.content:server"
+  ProcessMatch "Pulpcore-Worker" "/usr/bin/python.+/usr/bin/pulpcore-worker"
+  ProcessMatch "Pulpcore-app-wsgi" "/usr/bin/python.+/usr/bin/gunicorn.+pulpcore.app.wsgi:application"
 
   # Puppet Agent
-  ProcessMatch "Puppet-Agent" "/usr/bin/ruby.+/usr/bin/puppet.+agent.+--no-daemonize"
+  ProcessMatch "Puppet-Agent" ".*puppet.+agent.+--no-daemonize"
 
   # Qpidd + dispatch router
   Process "qdrouterd"
@@ -116,6 +120,9 @@ LoadPlugin apache
   
   # Smartproxy Dynflow core
   ProcessMatch "DynFlow-SmartProxy-Core" "ruby.+/usr/bin/smart_proxy_dynflow_core"
+
+  # Redis
+  Process "redis" ".*redis.*"
 
   # Tomcat
   ProcessMatch "Tomcat" ".*tomcat.*"
