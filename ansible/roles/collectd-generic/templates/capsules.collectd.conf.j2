@@ -75,10 +75,25 @@ LoadPlugin apache
   IgnoreSelected false
 </Plugin>
 
+<Plugin postgresql>
+  <Database pulp>
+    Host "localhost"
+    Port "5432"
+    User "pulp"
+    Password "{{ capsule_pulp_password.stdout }}"
+    # Predefined:
+    Query backends
+    Query transactions
+    Query queries
+    Query table_states
+    Query disk_io
+    Query disk_usage
+  </Database>
+</Plugin>
+
 <Plugin processes>
   # DynFlow
-  ProcessMatch "dynflow_executor" "dynflow.+executor$"
-  ProcessMatch "dynflow_executor_monitor" "dynflow.+executor.+monitor$"
+  ProcessMatch "dynflow" "(dynflow.*|sidekiq.*)"
 
   # Elasticsearch
   ProcessMatch "Elasticsearch" ".*elasticsearch.*"

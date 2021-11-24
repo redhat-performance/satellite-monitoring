@@ -75,6 +75,15 @@
   register: satellite_foreman_password
   when: "'{{config_type}}' == 'satellite6'"
 
+- name: Get pulp PostgresDB Password on Sat
+  shell: grep -i "password" /etc/pulp/settings.py | awk '{print $2}' | tr -d "',"
+  register: satellite_pulp_password
+  when: "'{{config_type}}' == 'satellite6'"
+
+- name: Get pulp PostgresDB Password on capsule
+  shell: grep -i "password" /etc/pulp/settings.py | awk '{print $2}' | tr -d "',"
+  register: capsule_pulp_password
+  when: "'{{config_type}}' == 'capsules'"
 
 # - name: Allow group read to /etc/origin/master/admin.key
 #   file: path=/etc/origin/master/admin.key mode=0640

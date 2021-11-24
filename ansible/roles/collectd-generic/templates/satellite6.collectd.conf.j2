@@ -122,6 +122,19 @@ LoadPlugin apache
     Query disk_io
     Query disk_usage
   </Database>
+  <Database pulp>
+    Host "localhost"
+    Port "5432"
+    User "pulp"
+    Password "{{ satellite_pulp_password.stdout }}"
+    # Predefined:
+    Query backends
+    Query transactions
+    Query queries
+    Query table_states
+    Query disk_io
+    Query disk_usage
+  </Database>
 </Plugin>
 
 <Plugin processes>
