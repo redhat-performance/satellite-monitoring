@@ -75,6 +75,9 @@
   register: satellite_foreman_password
   when: "'{{config_type}}' == 'satellite6'"
 
+- name: Get pulp PostgresDB Password
+  shell: grep -i "password" /etc/pulp/settings.py | awk '{print $2}' | tr -d "',"
+  register: satellite_pulp_password
 
 # - name: Allow group read to /etc/origin/master/admin.key
 #   file: path=/etc/origin/master/admin.key mode=0640
