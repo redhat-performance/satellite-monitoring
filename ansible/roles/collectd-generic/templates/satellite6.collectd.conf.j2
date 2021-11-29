@@ -180,7 +180,7 @@ LoadPlugin apache
   ProcessMatch "Foreman-SmartProxy" "ruby.+/usr/share/foreman-proxy/bin/smart-proxy"
 
   # Redis
-  Process "redis" ".*redis.*"
+  ProcessMatch "redis" ".*redis.*"
 
   # Squid
   Process "squid"
