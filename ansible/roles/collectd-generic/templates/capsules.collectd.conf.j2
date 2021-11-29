@@ -137,7 +137,7 @@ LoadPlugin apache
   ProcessMatch "DynFlow-SmartProxy-Core" "ruby.+/usr/bin/smart_proxy_dynflow_core"
 
   # Redis
-  Process "redis" ".*redis.*"
+  ProcessMatch "redis" ".*redis.*"
 
   # Tomcat
   ProcessMatch "Tomcat" ".*tomcat.*"
