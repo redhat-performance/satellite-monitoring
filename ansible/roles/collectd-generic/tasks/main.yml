@@ -68,26 +68,26 @@
 - name: Get Candlepin PostgresDB Password
   command: grep "jpa.config.hibernate.connection.password" /etc/candlepin/candlepin.conf
   register: satellite_candlepin_password
-  when: "'{{config_type}}' == 'satellite6'"
+  when: "config_type == 'satellite6'"
 
 - name: Get Foreman PostgresDB Password
   shell: grep "password" /etc/foreman/database.yml | awk '{print $2}' | tr -d '"'
   register: satellite_foreman_password
-  when: "'{{config_type}}' == 'satellite6'"
+  when: "config_type == 'satellite6'"
 
 - name: Get pulp PostgresDB Password on Sat
   shell: grep -i "password" /etc/pulp/settings.py | awk '{print $2}' | tr -d "',"
   register: satellite_pulp_password
-  when: "'{{config_type}}' == 'satellite6'"
+  when: "config_type == 'satellite6'"
 
 - name: Get pulp PostgresDB Password on capsule
   shell: grep -i "password" /etc/pulp/settings.py | awk '{print $2}' | tr -d "',"
   register: capsule_pulp_password
-  when: "'{{config_type}}' == 'capsules'"
+  when: "config_type == 'capsules'"
 
 # - name: Allow group read to /etc/origin/master/admin.key
 #   file: path=/etc/origin/master/admin.key mode=0640
-#   when: "'{{config_type}}' == 'ose'"
+#   when: "config_type == 'ose'"
 
 - name: Configure collectd.conf
   template:
