@@ -3,6 +3,11 @@
 # Install/run collectd for satellite (Generic)
 #
 
+- name: "Detect RHEL release"
+  setup:
+    filter: ansible_distribution_major_version
+  when: ansible_distribution_major_version is not defined
+
 - name: Disable Foreman Protector lock
   command: foreman-maintain packages unlock
 
@@ -11,11 +16,17 @@
   ignore_errors: true
   register: epel_installed
 
-- name: Get EPEL repo if not already there
+- name: Get EPEL7 repo if not already there
   get_url:
-    url: "{{ epel_repo }}"
+    url: "{{ epel_repo_el7 }}"
     dest: /root/epel-release.rpm
-  when: epel_installed.rc != 0
+  when: epel_installed.rc != 0 and ansible_distribution_major_version|int == 7
+
+- name: Get EPEL8 repo if not already there
+  get_url:
+    url: "{{ epel_repo_el8 }}"
+    dest: /root/epel-release.rpm
+  when: epel_installed.rc != 0 and ansible_distribution_major_version|int == 8
 
 - name: Install EPEL rpm if not already done
   shell: rpm -ivh --force /root/epel-release.rpm
@@ -28,7 +39,7 @@
 
 - name: Install collectd rpms
   yum:
-    name: "{{collectd_packages[config_type]}}"
+    name: "{{collectd_packages[config_type + '-el' + ansible_distribution_major_version]}}"
     state: present
   become: true
   register: install_collectd

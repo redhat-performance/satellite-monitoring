@@ -6,7 +6,8 @@ satperf_hosts: conf/hosts.ini
 #offline_install: true
 
 #EPEL Repo
-epel_repo: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
+epel_repo_el7: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+epel_repo_el8: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 #Graphite Settings
 graphite_prefix: satellite62
