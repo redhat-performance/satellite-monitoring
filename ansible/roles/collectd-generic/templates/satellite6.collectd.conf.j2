@@ -191,7 +191,7 @@ LoadPlugin apache
   ProcessMatch "Trends:Counter" "/opt/rh/ruby193/root/usr/bin/ruby.+/opt/rh/ruby193/root/usr/bin/rake.+trends:counter"
   ProcessMatch "LDAP:Refresh_usergroups" "/opt/rh/ruby193/root/usr/bin/ruby.+/opt/rh/ruby193/root/usr/bin/rake.+ldap:refresh_usergroups"
 
-  Process "ruby"
+  ProcessMatch "ruby" ".*ruby.*
 
   # Collect on collectd process
   ProcessMatch "collectd" "/usr/sbin/collectd.+-C.+/etc/collectd.conf"
