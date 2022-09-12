@@ -18,6 +18,10 @@ collectd_packages:
     - collectd-apache
   docker-hosts:
     - collectd
-  capsules:
+  capsules-el7:
     - collectd
+    - collectd-apache
+  capsules-el8:
+    - collectd
+    - collectd-disk
     - collectd-apache
