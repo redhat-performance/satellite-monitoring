@@ -186,6 +186,12 @@ LoadPlugin apache
 
   # Tomcat
   ProcessMatch "Tomcat" ".*tomcat.*"
+  
+  # Mosquitto
+  ProcessMatch "Mosquitto" ".*mosquitto.*"
+  
+   # rhcd
+  ProcessMatch "rhcd" ".*rhcd.*"
 
   # Other background tasks
   ProcessMatch "Trends:Counter" "/opt/rh/ruby193/root/usr/bin/ruby.+/opt/rh/ruby193/root/usr/bin/rake.+trends:counter"
