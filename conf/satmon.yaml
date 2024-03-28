@@ -1,7 +1,4 @@
 ---
-# satperf project settings
-satperf_hosts: conf/hosts.ini
-
 #Enable offline install if you want to go for that
 #offline_install: true
 
