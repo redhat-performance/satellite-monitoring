@@ -9,13 +9,18 @@ collectd_packages:
     - collectd-turbostat
   satellite6-el7:
     - collectd
-    - collectd-postgresql
     - collectd-apache
+    - collectd-postgresql
   satellite6-el8:
     - collectd
+    - collectd-apache
     - collectd-disk
     - collectd-postgresql
+  satellite6-el9:
+    - collectd
     - collectd-apache
+    - collectd-disk
+    - collectd-postgresql
   docker-hosts:
     - collectd
   capsules-el7:
@@ -23,5 +28,9 @@ collectd_packages:
     - collectd-apache
   capsules-el8:
     - collectd
-    - collectd-disk
     - collectd-apache
+    - collectd-disk
+  capsules-el9:
+    - collectd
+    - collectd-apache
+    - collectd-disk

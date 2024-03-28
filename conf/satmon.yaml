@@ -2,10 +2,6 @@
 #Enable offline install if you want to go for that
 #offline_install: true
 
-#EPEL Repo
-epel_repo_el7: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-epel_repo_el8: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-
 #Graphite Settings
 graphite_prefix: satellite62
 graphite_port: 10009

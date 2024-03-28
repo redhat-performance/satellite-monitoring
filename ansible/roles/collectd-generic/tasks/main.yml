@@ -16,17 +16,11 @@
   ignore_errors: true
   register: epel_installed
 
-- name: Get EPEL7 repo if not already there
+- name: Get EPEL repo if not already there
   get_url:
-    url: "{{ epel_repo_el7 }}"
+    url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
     dest: /root/epel-release.rpm
-  when: epel_installed.rc != 0 and ansible_distribution_major_version|int == 7
-
-- name: Get EPEL8 repo if not already there
-  get_url:
-    url: "{{ epel_repo_el8 }}"
-    dest: /root/epel-release.rpm
-  when: epel_installed.rc != 0 and ansible_distribution_major_version|int == 8
+  when: epel_installed.rc != 0
 
 - name: Install EPEL rpm if not already done
   shell: rpm -ivh --force /root/epel-release.rpm
@@ -39,7 +33,7 @@
 
 - name: Install collectd rpms
   yum:
-    name: "{{collectd_packages[config_type + '-el' + ansible_distribution_major_version]}}"
+    name: "{{ collectd_packages[config_type + '-el' + ansible_distribution_major_version] }}"
     state: present
   become: true
   register: install_collectd
