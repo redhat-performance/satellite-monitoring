@@ -24,6 +24,9 @@
   - $Cloud.$Node.processes-qdrouterd.ps_rss
   - Satellite6 Process Memory -> Summerized -> qdrouterd RSS
 -
+  - $Cloud.$Node.processes-mosquitto.ps_rss
+  - Satellite6 Process Memory -> Summerized -> mosquitto RSS
+-
   - scale($Cloud.$Node.processes-httpd.ps_cputime.user, 0.0001)
   - Satellite6 Process CPU -> Summerized -> httpd User
 -
@@ -47,6 +50,9 @@
 -
   - scale($Cloud.$Node.processes-qdrouterd.ps_cputime.user, 0.0001)
   - Satellite6 Process CPU -> Summerized -> qdrouterd User
+-
+  - scale($Cloud.$Node.processes-mosquitto.ps_cputime.user, 0.0001)
+  - Satellite6 Process CPU -> Summerized -> mosquitto User
 -
   - $Cloud.$Node.postgresql-candlepin.pg_n_tup_c-del
   - PostgreSQL -> Candlepin Tuple Operations -> c-del

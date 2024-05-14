@@ -96,6 +96,9 @@ per_process_panels:
     - name: "Tomcat"
       processes:
         - Tomcat
+    - name: "Mosquitto"
+      processes:
+        - mosquitto
     - name: "Background Tasks"
       processes:
         - "Trends:Counter"
