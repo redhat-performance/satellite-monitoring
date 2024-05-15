@@ -93,6 +93,9 @@ per_process_panels:
     - name: "Qpidd"
       processes:
         - qpidd
+    - name: "Redis"
+      processes:
+        - Redis
     - name: "Tomcat"
       processes:
         - Tomcat
