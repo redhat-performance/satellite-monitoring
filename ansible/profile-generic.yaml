@@ -1,0 +1,6 @@
+---
+- hosts: satellite6,capsules
+  gather_facts: false
+  roles:
+    - profile-generic
+...
