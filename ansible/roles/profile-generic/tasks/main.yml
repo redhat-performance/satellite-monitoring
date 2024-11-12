@@ -1,0 +1,82 @@
+---
+#
+# Install profiling packages (Generic)
+#
+
+- name: "Detect RHEL release"
+  setup:
+    filter: ansible_distribution_major_version
+  when: ansible_distribution_major_version is not defined
+
+- name: Disable Foreman Protector lock
+  ansible.builtin.command:
+    cmd: |
+      foreman-maintain packages unlock
+
+- name: Install bcc-tools, perf and js-d3-flame-graph packages
+  ansible.builtin.dnf:
+    name:
+      - bcc-tools
+      - perf
+      - js-d3-flame-graph
+
+- name: Enable the source and debug information package channels
+  community.general.rhsm_repository:
+    name:
+      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-baseos-debug-rpms
+      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-baseos-source-rpms
+      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-appstream-debug-rpms
+      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-appstream-source-rpms
+    state: enabled
+
+- name: Install required debug packages
+  ansible.builtin.shell:
+    cmd: |
+      dnf debuginfo-install -y \
+        httpd \
+        openssl-libs \
+        postgresql-server \
+        python3.11 \
+        redis \
+        ruby-libs
+
+- name: Check for EPEL
+  shell: rpm -qa | grep -q epel-release
+  ignore_errors: true
+  register: epel_installed
+
+- name: Get EPEL repo if not already there
+  get_url:
+    url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    dest: /root/epel-release.rpm
+  when: epel_installed.rc != 0
+
+- name: Install EPEL rpm if not already done
+  shell: rpm -ivh --force /root/epel-release.rpm
+  when: epel_installed.rc != 0
+
+- name: Check for enabled epel-release
+  shell: yum repolist | grep -q epel
+  ignore_errors: true
+  register: epel_enabled
+
+- name: Install flamegraph package from EPEL
+  ansible.builtin.dnf:
+    name:
+      - flamegraph
+  when: epel_enabled is succeeded
+
+# sometimes there's a stale epel package present, so rpm -e fails
+# because somebody deleted the .repo files without uninstalling
+# epel-release and rpm -e fails to remove multiple versions of the
+# package. So we need to check this and remove all one by one
+- name: Delete EPEL repo package
+  yum:
+    name: epel-release
+    state: absent
+
+- name: Disable EPEL
+  yum_repository:
+    name: epel
+    state: absent
+...
