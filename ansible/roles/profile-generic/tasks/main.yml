@@ -33,12 +33,13 @@
   ansible.builtin.shell:
     cmd: |
       dnf debuginfo-install -y \
-        httpd \
+        apr httpd httpd-core libnghttp2 mod_ssl \
         openssl-libs \
         postgresql-server \
         python3.11 \
         redis \
-        ruby-libs
+        ruby-libs \
+        libxcrypt tcl-devel zlib-devel
 
 - name: Check for EPEL
   shell: rpm -qa | grep -q epel-release
