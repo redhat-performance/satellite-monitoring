@@ -55,57 +55,36 @@ per_process_metrics:
 
 per_process_panels:
   Satellite6:
-    - name: "Summerized"
+    - name: "Summarized"
       processes:
         - httpd
-        - ruby
-    - name: "DynFlow"
-      processes:
-        - dynflow_executor
-        - dynflow_executor_monitor
-    - name: "Foreman-SmartProxy"
-      processes:
-        - Foreman-SmartProxy
-    - name: "Mongodb"
-      processes:
-        - mongod
-    - name: "Passenger"
-      processes:
-        - Passenger-Forman
-        - Passenger-Puppet
-        - PassengerHelperAgent
-        - PassengerLoggingAgent
-        - PassengerWatchdog
     - name: "Postgres"
       processes:
-        - postgres
+        - Postgres
     - name: "Pulp"
       processes:
-        - Pulp-Scheduler
-        - Pulp-Resource-Manager
-        - Pulp-Resource-Worker
-    - name: "Puppet-Agent"
+        - Pulpcore-API
+        - Pulpcore-Content
+        - Pulpcore-Worker
+    - name: "Smart Proxy"
       processes:
-        - Puppet-Agent
-    - name: "Qpidd Dispatch Router"
-      processes:
-        - qdrouterd
-    - name: "Qpidd"
-      processes:
-        - qpidd
+        - Foreman-SmartProxy
     - name: "Redis"
       processes:
-        - Redis
+        - redis-server
+    - name: "Mosquitto"
+      processes:
+        - mosquitto
+    - name: "Puma"
+      processes:
+        - Puma-Worker
     - name: "Tomcat"
       processes:
         - Tomcat
-    - name: "Mosquitto"
+    - name: "Sidekiq"
       processes:
-        - Mosquitto
-    - name: "Background Tasks"
-      processes:
-        - "Trends:Counter"
-        - "LDAP:Refresh_usergroups"
+        - Sidekiq
     - name: "Collectd"
       processes:
         - collectd
+...
