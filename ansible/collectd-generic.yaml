@@ -8,7 +8,6 @@
 # ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini playbooks/monitoring/collectd-generic.yaml --tags="docker-hosts"
 # ansible-playbook --private-key conf/id_rsa -i conf/hosts.ini playbooks/monitoring/collectd-generic.yaml --tags="satellite6,capsules"
 - hosts: satellite6
-  remote_user: root
   vars:
     config_type: satellite6
   vars_files:
@@ -18,7 +17,6 @@
   tags: satellite6
 
 - hosts: capsules
-  remote_user: root
   vars:
     config_type: capsules
   vars_files:
