@@ -92,67 +92,28 @@ LoadPlugin apache
 </Plugin>
 
 <Plugin processes>
-  # DynFlow
-  ProcessMatch "dynflow" "(dynflow.*|sidekiq.*)"
-
-  # Elasticsearch
-  ProcessMatch "Elasticsearch" ".*elasticsearch.*"
-
   # Apache
   Process "httpd"
 
-  # Mongodb
-  Process "mongod"
-
-  # Passenger
-  ProcessMatch "Passenger-Forman" "Passenger.+RackApp:.+/usr/share/foreman"
-  ProcessMatch "Passenger-Puppet" "Passenger.+RackApp:.+/etc/puppet/rack"
-  ProcessMatch "PassengerHelperAgent" "PassengerHelperAgent"
-  ProcessMatch "PassengerLoggingAgent" "PassengerLoggingAgent"
-  ProcessMatch "PassengerWatchdog" "PassengerWatchdog"
-
   # Postgres database
-  ProcessMatch "postgres" "postgres.*"
+  ProcessMatch "Postgres" "(/usr/bin/postmaster .*|postgres: .+)"
 
   # Pulp
-  ProcessMatch "Pulp-Scheduler" "/usr/bin/python.+/usr/bin/celery.+beat.+--scheduler=pulp.server.async.scheduler.Scheduler"
-  ProcessMatch "Pulp-Resource-Manager" "/usr/bin/python.+/usr/bin/celery.+worker.+-A.+pulp.server.async.app.+-n.+resource_manager"
-  ProcessMatch "Pulp-Resource-Worker" "/usr/bin/python.+/usr/bin/celery.+worker.+-n.+reserved_resource_worker"
-  # Pulp in sat6.10
-  ProcessMatch "Pulpcore-Content-Server" "/usr/bin/python.+/usr/bin/gunicorn.+pulpcore.content:server"
-  ProcessMatch "Pulpcore-Worker" "/usr/bin/python.+/usr/bin/pulpcore-worker"
-  ProcessMatch "Pulpcore-app-wsgi" "/usr/bin/python.+/usr/bin/gunicorn.+pulpcore.app.wsgi:application"
-
-  # Puppet Agent
-  ProcessMatch "Puppet-Agent" ".*puppet.+agent.+--no-daemonize"
-
-  # Qpidd + dispatch router
-  Process "qdrouterd"
-  Process "qpidd"
+  ProcessMatch "Pulpcore-Content" "/usr/bin/python.+ /usr/bin/pulpcore-content"
+  ProcessMatch "Pulpcore-Worker" "/usr/bin/python.+ /usr/bin/pulpcore-worker"
+  ProcessMatch "Pulpcore-API" "/usr/bin/python.+ /usr/bin/pulpcore-api"
 
   # Foreman smart proxy
-  ProcessMatch "Foreman-SmartProxy" "ruby.+/usr/share/foreman-proxy/bin/smart-proxy"
-  
-  # Smartproxy Dynflow core
-  ProcessMatch "DynFlow-SmartProxy-Core" "ruby.+/usr/bin/smart_proxy_dynflow_core"
+  ProcessMatch "Foreman-SmartProxy" "/usr/bin/ruby /usr/share/foreman-proxy/bin/smart-proxy"
 
   # Redis
-  ProcessMatch "Redis" ".*redis-server.*"
-
-  # Tomcat
-  ProcessMatch "Tomcat" ".*tomcat.*"
+  Process "redis-server"
 
   # Mosquitto
-  ProcessMatch "Mosquitto" ".*mosquitto.*"
-
-  # Other background tasks
-  ProcessMatch "Trends:Counter" "/opt/rh/ruby193/root/usr/bin/ruby.+/opt/rh/ruby193/root/usr/bin/rake.+trends:counter"
-  ProcessMatch "LDAP:Refresh_usergroups" "/opt/rh/ruby193/root/usr/bin/ruby.+/opt/rh/ruby193/root/usr/bin/rake.+ldap:refresh_usergroups"
-
-  Process "ruby"
+  Process "mosquitto"
 
   # Collect on collectd process
-  ProcessMatch "collectd" "/usr/sbin/collectd.+-C.+/etc/collectd.conf"
+  Process "collectd"
 </Plugin>
 
 <Plugin swap>
