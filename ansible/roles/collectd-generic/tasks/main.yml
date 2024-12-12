@@ -47,25 +47,11 @@
 #
 # Enable mod_status
 #
-- name: Determine if passenger is installed
-  command:
-    rpm -q passenger
-  register: passenger_out
-  ignore_errors: true
-
-- name: Enable mod_status (server with Passenger)
-  copy:
-    src: status-passenger.conf
-    dest: /etc/httpd/conf.d/status.conf
-  notify: restart httpd
-  when: passenger_out.rc == 0
-
-- name: Enable mod_status (server with Puma)
-  copy:
+- name: Enable mod_status
+  ansible.builtin.copy:
     src: status.conf
     dest: /etc/httpd/conf.d/status.conf
   notify: restart httpd
-  when: passenger_out.rc != 0
 
 #
 # Satellite6 specific configuration steps
