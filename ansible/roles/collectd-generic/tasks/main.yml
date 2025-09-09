@@ -48,28 +48,37 @@
     cmd: |
       foreman-installer --enable-apache-mod-status
 
-#
-# Satellite6 specific configuration steps
-#
-- name: Get Candlepin PostgresDB Password
-  command: grep "jpa.config.hibernate.connection.password" /etc/candlepin/candlepin.conf
-  register: satellite_candlepin_password
-  when: "config_type == 'satellite6'"
+- name: Satellite6 specific configuration steps
+  when:
+    - "config_type == 'satellite6'"
+  block:
+    - name: Get Candlepin PostgresDB Password
+      ansible.builtin.command:
+        cmd: |
+          grep 'jpa.config.hibernate.connection.password' /etc/candlepin/candlepin.conf
+      register: satellite_candlepin_password
 
-- name: Get Foreman PostgresDB Password
-  shell: grep "password" /etc/foreman/database.yml | awk '{print $2}' | tr -d '"'
-  register: satellite_foreman_password
-  when: "config_type == 'satellite6'"
+    - name: Get Foreman PostgresDB Password
+      ansible.builtin.shell:
+        cmd: |
+          grep 'password' /etc/foreman/database.yml | awk -F'"' '{print $2}'
+      register: satellite_foreman_password
 
-- name: Get pulp PostgresDB Password on Sat
-  shell: grep -i "password" /etc/pulp/settings.py | awk '{print $2}' | tr -d "',"
-  register: satellite_pulp_password
-  when: "config_type == 'satellite6'"
+    - name: Get pulp PostgresDB Password on Sat
+      ansible.builtin.shell:
+        cmd: |
+          grep -i 'password' /etc/pulp/settings.py | awk -F'"' '{print $2}'
+      register: satellite_pulp_password
 
-- name: Get pulp PostgresDB Password on capsule
-  shell: grep -i "password" /etc/pulp/settings.py | awk '{print $2}' | tr -d "',"
-  register: capsule_pulp_password
-  when: "config_type == 'capsules'"
+- name: Capsules specific configuration steps
+  when:
+    - "config_type == 'capsules'"
+  block:
+    - name: Get pulp PostgresDB Password on capsule
+      ansible.builtin.shell:
+        cmd: |
+          grep -i 'password' /etc/pulp/settings.py | awk -F'"' '{print $2}'
+      register: capsule_pulp_password
 
 # - name: Allow group read to /etc/origin/master/admin.key
 #   file: path=/etc/origin/master/admin.key mode=0640
