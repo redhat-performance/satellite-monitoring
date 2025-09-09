@@ -40,20 +40,13 @@
   become: true
   register: install_collectd
 
-#create /etc/httpd/conf.d if not exist
-- file:
-    path: /etc/httpd/conf.d
-    state: directory
-    mode: 0755
-
 #
 # Enable mod_status
 #
 - name: Enable mod_status
-  ansible.builtin.copy:
-    src: status.conf
-    dest: /etc/httpd/conf.d/status.conf
-  notify: restart httpd
+  ansible.builtin.command:
+    cmd: |
+      foreman-installer --enable-apache-mod-status
 
 #
 # Satellite6 specific configuration steps
