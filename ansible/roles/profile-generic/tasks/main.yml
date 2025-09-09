@@ -8,7 +8,7 @@
     filter: ansible_distribution_major_version
   when: ansible_distribution_major_version is not defined
 
-- name: Disable Foreman Protector lock
+- name: Disable Foreman protector lock
   ansible.builtin.command:
     cmd: |
       foreman-maintain packages unlock
@@ -80,4 +80,9 @@
   yum_repository:
     name: epel
     state: absent
+
+- name: Re-enable Foreman protector lock
+  ansible.builtin.command:
+    cmd: |
+      foreman-maintain packages lock
 ...
