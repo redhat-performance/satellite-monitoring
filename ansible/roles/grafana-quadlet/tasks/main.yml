@@ -1,0 +1,80 @@
+---
+# tasks file for grafana-quadlet
+
+- name: Create Grafana service (quadlet) from the container
+  containers.podman.podman_container:
+    name: grafana
+    image: "{{ grafana_container }}"
+    state: quadlet
+    network: host
+    volumes: "{{ grafana_volumes }}"
+    env: "{{ grafana_env }}"
+    sdnotify: healthy
+    healthcheck: "{{ grafana_healthcheck }}"
+    quadlet_options:
+      - |
+        [Install]
+        WantedBy=default.target grafana.target
+        [Unit]
+        PartOf=grafana.target
+        Wants=valkey.service pcp.service
+        After=valkey.service pcp.service
+
+- name: Run daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Flush handlers to restart services
+  ansible.builtin.meta: flush_handlers
+
+- name: Start the Grafana service
+  ansible.builtin.systemd_service:
+    name: grafana
+    state: started
+
+- name: Enable PCP plugin
+  register: pcp_plugin
+  ansible.builtin.uri:
+    url: "http://{{ inventory_hostname }}:3000/api/plugins/performancecopilot-pcp-app/settings"
+    body_format: json
+    force_basic_auth: true
+    url_username: "{{ grafana_admin_username }}"
+    url_password: "{{ grafana_admin_password }}"
+    method: POST
+    body:
+      enabled: true
+      pinned: true
+      jsonData: null
+
+# - name: Enable Valkey datasource
+#   register: valkey
+#   ansible.builtin.uri:
+#     url: "http://{{ inventory_hostname }}:3000/api/datasources"
+#     body_format: json
+#     force_basic_auth: true
+#     url_username: "{{ grafana_admin_username }}"
+#     url_password: "{{ grafana_admin_password }}"
+#     method: POST
+#     body:
+#       name: 'PCP Valkey'
+#       type: 'performancecopilot-valkey-datasource'
+#       access: 'proxy'
+#       url: "http://{{ inventory_hostname }}:44322"
+#       jsonData: null
+
+# - name: Enable Vector datasource
+#   register: vector
+#   ansible.builtin.uri:
+#     url: "http://{{ inventory_hostname }}:3000/api/datasources"
+#     body_format: json
+#     force_basic_auth: true
+#     url_username: "{{ grafana_admin_username }}"
+#     url_password: "{{ grafana_admin_password }}"
+#     method: POST
+#     body:
+#       name: 'PCP Vector'
+#       type: 'performancecopilot-vector-datasource'
+#       access: 'proxy'
+#       url: "http://{{ inventory_hostname }}:44322"
+#       jsonData: null
+...

@@ -1,0 +1,34 @@
+---
+# tasks file for pcp
+
+- name: Create PCP service (quadlet) from the container
+  containers.podman.podman_container:
+    name: pcp
+    image: "{{ pcp_container }}"
+    state: quadlet
+    network: host
+    volumes: "{{ pcp_volumes }}"
+    # publish: "{{ pcp_ports }}"
+    sdnotify: true
+    # sdnotify: healthy
+    # healthcheck: "{{ pcp_healthcheck }}"
+    systemd: always
+    quadlet_options:
+      - |
+        [Install]
+        WantedBy=default.target grafana.target
+        [Unit]
+        PartOf=grafana.target
+
+- name: Run daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Flush handlers to restart services
+  ansible.builtin.meta: flush_handlers
+
+- name: Start the PCP service
+  ansible.builtin.systemd_service:
+    name: pcp
+    state: started
+...

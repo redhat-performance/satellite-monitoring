@@ -1,0 +1,25 @@
+---
+
+container_registry: registry.redhat.io
+
+# Valkey
+valkey_container_image: "{{ container_registry }}/rhel10/valkey-8"
+valkey_container_tag: latest
+valkey_container: "{{ valkey_container_image }}:{{ valkey_container_tag }}"
+
+# PCP
+pcp_container_image: "{{ container_registry }}/rhel10/pcp"
+pcp_container_tag: latest
+pcp_container: "{{ pcp_container_image }}:{{ pcp_container_tag }}"
+
+# Grafana
+grafana_container_image: "{{ container_registry }}/rhel10/grafana"
+grafana_container_tag: latest
+grafana_container: "{{ grafana_container_image }}:{{ grafana_container_tag }}"
+
+images:
+  - "{{ valkey_container }}"
+  - "{{ pcp_container }}"
+  - "{{ grafana_container }}"
+
+...

@@ -1,0 +1,8 @@
+
+# handlers file
+
+- name: Restart service
+  ansible.builtin.systemd:
+    name: "{{ container_name }}"
+    state: restarted
+...

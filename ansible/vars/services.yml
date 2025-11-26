@@ -1,0 +1,27 @@
+---
+
+# Valkey
+valkey_volumes:
+  - valkey-data:/var/lib/valkey/data:Z
+valkey_ports:
+  - "{{ 6379 }}:{{ 6379 }}"
+valkey_command: '["run-valkey", "--supervised", "systemd"]'
+valkey_healthcheck: 'valkey-cli ping | grep -q PONG'
+
+# PCP
+pcp_volumes:
+  - pcp-archives:/var/log/pcp/pmlogger:Z
+  - pmlogger-control:/etc/pcp/pmlogger/control.d:Z
+pcp_ports:
+  - "{{ 44321 }}:{{ 44321 }}"
+  - "{{ 44322 }}:{{ 44322 }}"
+# pcp_healthcheck: 'pcp-verify'
+
+# Grafana
+grafana_volumes:
+  - grafana-data:/var/lib/grafana:Z
+grafana_env:
+  GF_INSTALL_PLUGINS: 'https://github.com/performancecopilot/grafana-pcp/releases/download/v5.3.0/performancecopilot-pcp-app-5.3.0.zip;performancecopilot-pcp-app'
+  GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: 'performancecopilot-pcp-app,pcp-valkey-datasource,pcp-vector-datasource,pcp-bpftrace-datasource,pcp-flamegraph-panel,pcp-breadcrumbs-panel,pcp-troubleshooting-panel,performancecopilot-valkey-datasource,performancecopilot-vector-datasource,performancecopilot-bpftrace-datasource,performancecopilot-flamegraph-panel,performancecopilot-breadcrumbs-panel,performancecopilot-troubleshooting-panel'
+grafana_healthcheck: 'curl --fail --insecure http://localhost:3000/api/health'
+...

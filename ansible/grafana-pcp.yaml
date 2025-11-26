@@ -1,0 +1,32 @@
+---
+# Build and upload the grafana template for the server
+
+- hosts: grafana_pcp
+  gather_facts: false
+  vars_files:
+    - "vars/images.yml"
+    - "vars/services.yml"
+
+  roles:
+    - role: linux-system-roles.firewall
+      vars:
+        firewall:
+          - service: grafana
+            state: enabled
+          # # XXX: Needed ???
+          # - service: pmcd
+          #   state: enabled
+          - service: pmproxy
+            state: enabled
+    - role: linux-system-roles.storage
+    - role: linux-system-roles.tuned
+    - role: pull-images
+    - role: linux-system-roles.selinux
+      vars:
+        selinux_restore_dirs:
+          - /var/lib/containers/storage
+    - role: valkey-quadlet
+    - role: pcp-quadlet
+    - role: grafana-quadlet
+    - role: systemd_target
+...

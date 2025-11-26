@@ -1,0 +1,22 @@
+---
+- name: Define grafana.target
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/grafana.target
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Unit]
+      Description=Grafana services
+      [Install]
+      WantedBy=default.target
+
+- name: Run daemon reload to load new target
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Start grafana.target
+  ansible.builtin.systemd_service:
+    name: grafana.target
+    state: started
+    enabled: true

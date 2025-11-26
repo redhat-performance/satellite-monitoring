@@ -1,0 +1,33 @@
+---
+# tasks file for valkey
+
+- name: Create Valkey service (quadlet) from the container
+  containers.podman.podman_container:
+    name: valkey
+    image: "{{ valkey_container }}"
+    state: quadlet
+    network: host
+    volumes: "{{ valkey_volumes }}"
+    publish: "{{ valkey_ports }}"
+    sdnotify: healthy
+    healthcheck: "{{ valkey_healthcheck }}"
+    command: "{{ valkey_command }}"
+    quadlet_options:
+      - |
+        [Install]
+        WantedBy=default.target grafana.target
+        [Unit]
+        PartOf=grafana.target
+
+- name: Run daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Flush handlers to restart services
+  ansible.builtin.meta: flush_handlers
+
+- name: Start the Valkey service
+  ansible.builtin.systemd_service:
+    name: valkey
+    state: started
+...
