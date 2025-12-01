@@ -1,84 +1,99 @@
 ---
 #
-# Install/run collectd for satellite (Generic)
+# Install/configure collectd for Satellite (Generic)
 #
 
-- name: "Detect RHEL release"
-  setup:
-    filter: ansible_distribution_major_version
-  when: ansible_distribution_major_version is not defined
+- name: Assert ansible_facts['distribution_major_version']
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution_major_version'] is defined
 
 - name: Disable Foreman protector lock
   ansible.builtin.command:
     cmd: |
       foreman-maintain packages unlock
-
-- name: Check for EPEL
-  shell: rpm -qa | grep -q epel-release
-  ignore_errors: true
-  register: epel_installed
-
-- name: Get EPEL repo if not already there
-  get_url:
-    url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-    dest: /root/epel-release.rpm
-  when: epel_installed.rc != 0
-
-- name: Install EPEL rpm if not already done
-  shell: rpm -ivh --force /root/epel-release.rpm
-  when: epel_installed.rc != 0
-
-- name: Check for enabled epel-release
-  shell: yum repolist | grep -q epel
-  ignore_errors: true
-  register: epel_enabled
-
-- name: Install collectd rpms
-  yum:
-    name: "{{ collectd_packages[config_type + '-el' + ansible_distribution_major_version] }}"
-    state: present
-  become: true
-  register: install_collectd
-
-#
-# Enable mod_status
-#
-- name: Enable mod_status
-  ansible.builtin.command:
-    cmd: |
-      foreman-installer --enable-apache-mod-status
-
-- name: Satellite6 specific configuration steps
   when:
-    - "config_type == 'satellite6'"
+    - product is not defined or
+      ( product == 'satellite' and sat_version is defined and sat_version != 'foremanctl' )
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install EPEL
+  when:
+    - "'epel-release' not in ansible_facts.packages"
   block:
-    - name: Get Candlepin PostgresDB Password
+    - name: Get EPEL repo if not already there
+      get_url:
+        url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
+        dest: /root/epel-release.rpm
+
+    - name: Install EPEL rpm if not already done
+      ansible.builtin.dnf:
+        name: /root/epel-release.rpm
+      when:
+        - "'epel-release' not in ansible_facts.packages"
+
+    - name: Gather package facts again
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Assert 'epel-release' is installed
+      ansible.builtin.assert:
+        that:
+          - "'epel-release' in ansible_facts.packages"
+
+- name: Install collectd related packages from EPEL
+  ansible.builtin.dnf:
+    name:
+      "{{ collectd_packages[config_type + '-el' + ansible_facts['distribution_major_version']] }}"
+
+- name: Satellite specific collectd configuration
+  when:
+    - product is not defined or
+      ( product == 'satellite' and sat_version is defined and sat_version != 'foremanctl' ) or
+      ( product == 'foreman' )
+  block:
+    #
+    # Enable mod_status
+    #
+    - name: Enable mod_status
       ansible.builtin.command:
         cmd: |
-          grep 'jpa.config.hibernate.connection.password' /etc/candlepin/candlepin.conf
-      register: satellite_candlepin_password
+          foreman-installer --enable-apache-mod-status
 
-    - name: Get Foreman PostgresDB Password
-      ansible.builtin.shell:
-        cmd: |
-          grep 'password' /etc/foreman/database.yml | awk -F'"' '{print $2}'
-      register: satellite_foreman_password
+    - name: Satellite6 specific configuration steps
+      when:
+        - "config_type == 'satellite6'"
+      block:
+        - name: Get Candlepin PostgresDB Password
+          ansible.builtin.command:
+            cmd: |
+              grep 'jpa.config.hibernate.connection.password' /etc/candlepin/candlepin.conf
+          register: satellite_candlepin_password
 
-    - name: Get pulp PostgresDB Password on Sat
-      ansible.builtin.shell:
-        cmd: |
-          grep -i 'password' /etc/pulp/settings.py | awk -F'"' '{print $2}'
-      register: satellite_pulp_password
+        - name: Get Foreman PostgresDB Password
+          ansible.builtin.shell:
+            cmd: |
+              grep 'password' /etc/foreman/database.yml | awk -F'"' '{print $2}'
+          register: satellite_foreman_password
 
-- name: Capsules specific configuration steps
-  when:
-    - "config_type == 'capsules'"
-  block:
-    - name: Get pulp PostgresDB Password on capsule
-      ansible.builtin.shell:
-        cmd: |
-          grep -i 'password' /etc/pulp/settings.py | awk -F'"' '{print $2}'
-      register: capsule_pulp_password
+        - name: Get pulp PostgresDB Password on Sat
+          ansible.builtin.shell:
+            cmd: |
+              grep -i 'password' /etc/pulp/settings.py | awk -F'"' '{print $2}'
+          register: satellite_pulp_password
+
+    - name: Capsules specific configuration steps
+      when:
+        - "config_type == 'capsules'"
+      block:
+        - name: Get pulp PostgresDB Password on capsule
+          ansible.builtin.shell:
+            cmd: |
+              grep -i 'password' /etc/pulp/settings.py | awk -F'"' '{print $2}'
+          register: capsule_pulp_password
 
 # - name: Allow group read to /etc/origin/master/admin.key
 #   file: path=/etc/origin/master/admin.key mode=0640
@@ -91,13 +106,11 @@
     owner=root
     group=root
     mode=0644
-  become: true
 
 # Configure selinux bits
 #
 - name: Check for collectd permissive
   shell: semodule -l | grep -q permissive_collectd_t
-  become: true
   register: collectd_permissive
   ignore_errors: true
   changed_when: false
@@ -105,8 +118,7 @@
 # This command is not always found?
 - name: Set permissive for collectd
   shell: semanage permissive -a collectd_t
-  become: true
-  when: collectd_permissive.rc != 0
+  when: collectd_permissive is failed
   ignore_errors: true
 
 #
@@ -119,47 +131,49 @@
     owner=root
     group=root
     mode=644
-  become: true
 
 - name: Check for collectd custom
   shell: semodule -l | grep -q custom-collectd
-  become: true
   register: collectd_custom
   ignore_errors: true
   changed_when: false
 
 - name: Set custom policy for collectd
   shell: semodule -i /root/custom-collectd.pp
-  become: true
-  when: collectd_custom.rc != 0
+  when: collectd_custom is failed
 
 # add collectd default group (not added with rpm -ivh)
-#
 - name: Add collectd group
   group: name=collectd state=present
-  become: true
 
 # Start collectd service
 - name: Setup collectd service
   service: name=collectd state=restarted enabled=true
-  become: true
 
-# sometimes there's a stale epel package present, so rpm -e fails
-# because somebody deleted the .repo files without uninstalling
-# epel-release and rpm -e fails to remove multiple versions of the
-# package. So we need to check this and remove all one by one
-- name: Delete EPEL repo package
-  yum:
-    name: epel-release
-    state: absent
+- name: Uninstall EPEL
+  when:
+    - "'epel-release' in ansible_facts.packages"
+  block:
+    # sometimes there's a stale epel package present, so rpm -e fails
+    # because somebody deleted the .repo files without uninstalling
+    # epel-release and rpm -e fails to remove multiple versions of the
+    # package. So we need to check this and remove all one by one
+    - name: Delete EPEL repo package
+      ansible.builtin.dnf:
+        name:
+          - epel-release
+        state: absent
 
-- name: Disable EPEL
-  yum_repository:
-    name: epel
-    state: absent
+    - name: Disable EPEL
+      yum_repository:
+        name: epel
+        state: absent
 
 - name: Re-enable Foreman protector lock
   ansible.builtin.command:
     cmd: |
       foreman-maintain packages lock
+  when:
+    - product is not defined or
+      ( product == 'satellite' and sat_version is defined and sat_version != 'foremanctl' )
 ...

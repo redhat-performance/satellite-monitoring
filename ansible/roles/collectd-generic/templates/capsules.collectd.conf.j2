@@ -34,6 +34,7 @@ LoadPlugin uptime
   DeleteSocket true
 </Plugin>
 
+{% if sat_version != 'foremanctl' %}
 LoadPlugin apache
 <Plugin apache>
     # Leave "Instance" blank unless you have multiple
@@ -43,6 +44,7 @@ LoadPlugin apache
        URL "http://127.0.0.1/server-status?auto"
    </Instance>
 </Plugin>
+{% endif %}
 
 #Setup StatsD
 <Plugin statsd>
@@ -75,6 +77,7 @@ LoadPlugin apache
   IgnoreSelected false
 </Plugin>
 
+{% if sat_version != 'foremanctl' %}
 <Plugin postgresql>
   <Database pulpcore>
     Host "localhost"
@@ -90,13 +93,14 @@ LoadPlugin apache
     Query disk_usage
   </Database>
 </Plugin>
+{% endif %}
 
 <Plugin processes>
   # Apache
   Process "httpd"
 
   # Postgres database
-  ProcessMatch "Postgres" "(/usr/bin/postmaster .*|postgres: .+)"
+  ProcessMatch "Postgres" "(/usr/bin/postmaster .*|postgres: .+|postgres)"
 
   # Pulp
   ProcessMatch "Pulpcore-Content" "/usr/bin/python.+ /usr/bin/pulpcore-content"
