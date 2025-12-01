@@ -3,15 +3,19 @@
 # Install profiling packages (Generic)
 #
 
-- name: "Detect RHEL release"
-  setup:
-    filter: ansible_distribution_major_version
-  when: ansible_distribution_major_version is not defined
+- name: Assert ansible_facts['distribution_major_version']
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution_major_version'] is defined
 
+# Until `ansible.builtin.dnf` supports natively `debuginfo-install`
 - name: Disable Foreman protector lock
   ansible.builtin.command:
     cmd: |
       foreman-maintain packages unlock
+  when:
+    - product is not defined or
+      ( product == 'satellite' and sat_version is defined and sat_version != 'foremanctl' )
 
 - name: Install bcc-tools, perf and js-d3-flame-graph packages
   ansible.builtin.dnf:
@@ -20,19 +24,15 @@
       - perf
       - js-d3-flame-graph
 
-- name: Enable the source and debug information package channels
-  community.general.rhsm_repository:
-    name:
-      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-baseos-debug-rpms
-      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-baseos-source-rpms
-      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-appstream-debug-rpms
-      - rhel-{{ ansible_distribution_major_version }}-for-x86_64-appstream-source-rpms
-    state: enabled
-
+# Until `ansible.builtin.dnf` supports natively `debuginfo-install`
 - name: Install required debug packages
   ansible.builtin.shell:
     cmd: |
       dnf debuginfo-install -y \
+        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-debug-rpms \
+        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-source-rpms \
+        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-debug-rpms \
+        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-source-rpms \
         apr httpd libnghttp2 mod_ssl \
         openssl-libs \
         postgresql-server \
@@ -41,48 +41,64 @@
         ruby-libs \
         libxcrypt tcl-devel zlib-devel
 
-- name: Check for EPEL
-  shell: rpm -qa | grep -q epel-release
-  ignore_errors: true
-  register: epel_installed
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
 
-- name: Get EPEL repo if not already there
-  get_url:
-    url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-    dest: /root/epel-release.rpm
-  when: epel_installed.rc != 0
+- name: Install EPEL
+  when:
+    - "'epel-release' not in ansible_facts.packages"
+  block:
+    - name: Get EPEL repo if not already there
+      get_url:
+        url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
+        dest: /root/epel-release.rpm
 
-- name: Install EPEL rpm if not already done
-  shell: rpm -ivh --force /root/epel-release.rpm
-  when: epel_installed.rc != 0
+    - name: Install EPEL rpm if not already done
+      ansible.builtin.dnf:
+        name: /root/epel-release.rpm
+      when:
+        - "'epel-release' not in ansible_facts.packages"
 
-- name: Check for enabled epel-release
-  shell: yum repolist | grep -q epel
-  ignore_errors: true
-  register: epel_enabled
+    - name: Gather package facts again
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Assert 'epel-release' is installed
+      ansible.builtin.assert:
+        that:
+          - "'epel-release' in ansible_facts.packages"
 
 - name: Install flamegraph package from EPEL
   ansible.builtin.dnf:
     name:
       - flamegraph
-  when: epel_enabled is succeeded
 
-# sometimes there's a stale epel package present, so rpm -e fails
-# because somebody deleted the .repo files without uninstalling
-# epel-release and rpm -e fails to remove multiple versions of the
-# package. So we need to check this and remove all one by one
-- name: Delete EPEL repo package
-  yum:
-    name: epel-release
-    state: absent
+- name: Uninstall EPEL
+  when:
+    - "'epel-release' in ansible_facts.packages"
+  block:
+    # sometimes there's a stale epel package present, so rpm -e fails
+    # because somebody deleted the .repo files without uninstalling
+    # epel-release and rpm -e fails to remove multiple versions of the
+    # package. So we need to check this and remove all one by one
+    - name: Delete EPEL repo package
+      ansible.builtin.dnf:
+        name:
+          - epel-release
+        state: absent
 
-- name: Disable EPEL
-  yum_repository:
-    name: epel
-    state: absent
+    - name: Disable EPEL
+      yum_repository:
+        name: epel
+        state: absent
 
+# Until `ansible.builtin.dnf` supports natively `debuginfo-install`
 - name: Re-enable Foreman protector lock
   ansible.builtin.command:
     cmd: |
       foreman-maintain packages lock
+  when:
+    - product is not defined or
+      ( product == 'satellite' and sat_version is defined and sat_version != 'foremanctl' )
 ...
