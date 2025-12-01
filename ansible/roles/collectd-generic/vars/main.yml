@@ -7,10 +7,6 @@ collectd_packages:
   graphite:
     - collectd
     - collectd-turbostat
-  satellite6-el7:
-    - collectd
-    - collectd-apache
-    - collectd-postgresql
   satellite6-el8:
     - collectd
     - collectd-apache
@@ -23,9 +19,6 @@ collectd_packages:
     - collectd-postgresql
   docker-hosts:
     - collectd
-  capsules-el7:
-    - collectd
-    - collectd-apache
   capsules-el8:
     - collectd
     - collectd-apache
