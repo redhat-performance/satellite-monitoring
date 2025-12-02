@@ -55,8 +55,9 @@
         dest: /root/epel-release.rpm
 
     - name: Install EPEL rpm if not already done
-      ansible.builtin.dnf:
-        name: /root/epel-release.rpm
+      ansible.builtin.command:
+        cmd: |
+          rpm -ivh --force /root/epel-release.rpm
       when:
         - "'epel-release' not in ansible_facts.packages"
 
