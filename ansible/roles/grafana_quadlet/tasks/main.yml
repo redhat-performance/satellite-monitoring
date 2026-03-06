@@ -24,13 +24,19 @@
   ansible.builtin.systemd:
     daemon_reload: true
 
-- name: Flush handlers to restart services
-  ansible.builtin.meta: flush_handlers
-
 - name: Start the Grafana service
   ansible.builtin.systemd_service:
     name: grafana
     state: started
+
+- name: Wait for Grafana to be ready
+  ansible.builtin.uri:
+    url: "http://{{ inventory_hostname }}:3000/api/health"
+    status_code: 200
+  register: _grafana_health
+  until: _grafana_health.status == 200
+  retries: 10
+  delay: 5
 
 - name: Enable PCP plugin
   register: pcp_plugin
