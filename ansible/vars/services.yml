@@ -13,8 +13,8 @@ pcp_volumes:
   - pcp-archives:/var/log/pcp/pmlogger:Z
   - pmlogger-control:/etc/pcp/pmlogger/control.d:Z
 pcp_ports:
-  - "{{ 44321 }}:{{ 44321 }}"
-  - "{{ 44322 }}:{{ 44322 }}"
+  - "44321:44321"
+  - "44322:44322"
 # pcp_healthcheck: 'pcp-verify'
 
 # Grafana
