@@ -9,10 +9,7 @@
     network: host
     volumes: "{{ pcp_volumes }}"
     # publish: "{{ pcp_ports }}"
-    sdnotify: true
-    # sdnotify: healthy
-    # healthcheck: "{{ pcp_healthcheck }}"
-    systemd: always
+    sdnotify: "container"
     quadlet_options:
       - |
         [Install]
@@ -23,9 +20,6 @@
 - name: Run daemon reload
   ansible.builtin.systemd:
     daemon_reload: true
-
-- name: Flush handlers to restart services
-  ansible.builtin.meta: flush_handlers
 
 - name: Start the PCP service
   ansible.builtin.systemd_service:
