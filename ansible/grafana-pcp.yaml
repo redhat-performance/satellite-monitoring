@@ -20,13 +20,13 @@
             state: enabled
     - role: linux-system-roles.storage
     - role: linux-system-roles.tuned
-    - role: pull-images
+    - role: pull_images
     - role: linux-system-roles.selinux
       vars:
         selinux_restore_dirs:
           - /var/lib/containers/storage
-    - role: valkey-quadlet
-    - role: pcp-quadlet
-    - role: grafana-quadlet
+    - role: valkey_quadlet
+    - role: pcp_quadlet
+    - role: grafana_quadlet
     - role: systemd_target
 ...
