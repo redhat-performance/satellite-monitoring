@@ -25,8 +25,8 @@
       vars:
         selinux_restore_dirs:
           - /var/lib/containers/storage
+    - role: systemd_target
     - role: valkey_quadlet
     - role: pcp_quadlet
     - role: grafana_quadlet
-    - role: systemd_target
 ...
