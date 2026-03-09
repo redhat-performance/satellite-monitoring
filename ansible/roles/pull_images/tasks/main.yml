@@ -1,13 +1,19 @@
 # tasks file for pull-images
 
-- name: Login to the container registry
-  containers.podman.podman_login:
-    registry: "{{ pull_images_registry }}"
-    username: "{{ pull_images_registry_username }}"
-    password: "{{ pull_images_registry_password }}"
+- name: Pull images as rootless user
+  become: true
+  become_method: "{{ grafana_pcp_become_method }}"
+  become_user: "{{ grafana_pcp_user }}"
+  environment: "{{ grafana_pcp_runtime_env }}"
+  block:
+    - name: Login to the container registry
+      containers.podman.podman_login:
+        registry: "{{ pull_images_registry }}"
+        username: "{{ pull_images_registry_username }}"
+        password: "{{ pull_images_registry_password }}"
 
-- name: Pull container images
-  containers.podman.podman_image:
-    name: "{{ item }}"
-  loop: "{{ pull_images_images }}"
+    - name: Pull container images
+      containers.podman.podman_image:
+        name: "{{ item }}"
+      loop: "{{ pull_images_images }}"
 ...

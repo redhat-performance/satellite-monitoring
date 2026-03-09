@@ -1,28 +1,36 @@
 ---
 # tasks file for pcp
 
-- name: Create PCP service (quadlet) from the container
-  containers.podman.podman_container:
-    name: pcp
-    image: "{{ pcp_container }}"
-    state: quadlet
-    network: host
-    volumes: "{{ pcp_volumes }}"
-    # publish: "{{ pcp_ports }}"
-    sdnotify: "container"
-    quadlet_options:
-      - |
-        [Install]
-        WantedBy=default.target grafana.target
-        [Unit]
-        PartOf=grafana.target
+- name: Configure PCP service as rootless user
+  become: true
+  become_method: "{{ grafana_pcp_become_method }}"
+  become_user: "{{ grafana_pcp_user }}"
+  environment: "{{ grafana_pcp_runtime_env }}"
+  block:
+    - name: Create PCP service (quadlet) from the container
+      containers.podman.podman_container:
+        name: pcp
+        image: "{{ pcp_container }}"
+        state: quadlet
+        network: host
+        volumes: "{{ pcp_volumes }}"
+        # publish: "{{ pcp_ports }}"
+        sdnotify: "container"
+        quadlet_options:
+          - |
+            [Install]
+            WantedBy=default.target grafana.target
+            [Unit]
+            PartOf=grafana.target
 
-- name: Run daemon reload
-  ansible.builtin.systemd:
-    daemon_reload: true
+    - name: Run daemon reload
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user
 
-- name: Start the PCP service
-  ansible.builtin.systemd_service:
-    name: pcp
-    state: started
+    - name: Start the PCP service
+      ansible.builtin.systemd_service:
+        name: pcp
+        state: started
+        scope: user
 ...

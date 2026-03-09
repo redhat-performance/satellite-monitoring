@@ -1,22 +1,28 @@
 ---
-- name: Define grafana.target
-  ansible.builtin.copy:
-    dest: /etc/systemd/system/grafana.target
-    owner: root
-    group: root
-    mode: '0644'
-    content: |
-      [Unit]
-      Description=Grafana services
-      [Install]
-      WantedBy=default.target
+- name: Configure grafana.target as rootless user
+  become: true
+  become_method: "{{ grafana_pcp_become_method }}"
+  become_user: "{{ grafana_pcp_user }}"
+  environment: "{{ grafana_pcp_runtime_env }}"
+  block:
+    - name: Define grafana.target
+      ansible.builtin.copy:
+        dest: "{{ grafana_pcp_systemd_user_dir }}/grafana.target"
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Grafana services
+          [Install]
+          WantedBy=default.target
 
-- name: Run daemon reload to load new target
-  ansible.builtin.systemd:
-    daemon_reload: true
+    - name: Run daemon reload to load new target
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user
 
-- name: Start grafana.target
-  ansible.builtin.systemd_service:
-    name: grafana.target
-    state: started
-    enabled: true
+    - name: Start grafana.target
+      ansible.builtin.systemd_service:
+        name: grafana.target
+        state: started
+        enabled: true
+        scope: user

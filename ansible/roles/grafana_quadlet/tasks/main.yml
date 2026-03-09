@@ -2,6 +2,10 @@
 # tasks file for grafana-quadlet
 
 - name: Create Grafana service (quadlet) from the container
+  become: true
+  become_method: "{{ grafana_pcp_become_method }}"
+  become_user: "{{ grafana_pcp_user }}"
+  environment: "{{ grafana_pcp_runtime_env }}"
   containers.podman.podman_container:
     name: grafana
     image: "{{ grafana_container }}"
@@ -21,13 +25,23 @@
         After=valkey.service pcp.service
 
 - name: Run daemon reload
+  become: true
+  become_method: "{{ grafana_pcp_become_method }}"
+  become_user: "{{ grafana_pcp_user }}"
+  environment: "{{ grafana_pcp_runtime_env }}"
   ansible.builtin.systemd:
     daemon_reload: true
+    scope: user
 
 - name: Start the Grafana service
+  become: true
+  become_method: "{{ grafana_pcp_become_method }}"
+  become_user: "{{ grafana_pcp_user }}"
+  environment: "{{ grafana_pcp_runtime_env }}"
   ansible.builtin.systemd_service:
     name: grafana
     state: started
+    scope: user
 
 - name: Wait for Grafana to be ready
   ansible.builtin.uri:

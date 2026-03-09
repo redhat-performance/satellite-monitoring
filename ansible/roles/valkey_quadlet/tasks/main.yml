@@ -1,30 +1,38 @@
 ---
 # tasks file for valkey
 
-- name: Create Valkey service (quadlet) from the container
-  containers.podman.podman_container:
-    name: valkey
-    image: "{{ valkey_container }}"
-    state: quadlet
-    network: host
-    volumes: "{{ valkey_volumes }}"
-    publish: "{{ valkey_ports }}"
-    sdnotify: healthy
-    healthcheck: "{{ valkey_healthcheck }}"
-    command: "{{ valkey_command }}"
-    quadlet_options:
-      - |
-        [Install]
-        WantedBy=default.target grafana.target
-        [Unit]
-        PartOf=grafana.target
+- name: Configure Valkey service as rootless user
+  become: true
+  become_method: "{{ grafana_pcp_become_method }}"
+  become_user: "{{ grafana_pcp_user }}"
+  environment: "{{ grafana_pcp_runtime_env }}"
+  block:
+    - name: Create Valkey service (quadlet) from the container
+      containers.podman.podman_container:
+        name: valkey
+        image: "{{ valkey_container }}"
+        state: quadlet
+        network: host
+        volumes: "{{ valkey_volumes }}"
+        publish: "{{ valkey_ports }}"
+        sdnotify: healthy
+        healthcheck: "{{ valkey_healthcheck }}"
+        command: "{{ valkey_command }}"
+        quadlet_options:
+          - |
+            [Install]
+            WantedBy=default.target grafana.target
+            [Unit]
+            PartOf=grafana.target
 
-- name: Run daemon reload
-  ansible.builtin.systemd:
-    daemon_reload: true
+    - name: Run daemon reload
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user
 
-- name: Start the Valkey service
-  ansible.builtin.systemd_service:
-    name: valkey
-    state: started
+    - name: Start the Valkey service
+      ansible.builtin.systemd_service:
+        name: valkey
+        state: started
+        scope: user
 ...
