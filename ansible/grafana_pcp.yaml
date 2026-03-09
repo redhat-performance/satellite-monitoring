@@ -6,6 +6,21 @@
   vars_files:
     - "vars/images.yml"
     - "vars/services.yml"
+    - "vars/grafana_pcp.yml"
+
+  pre_tasks:
+    - name: Set up rootless service user
+      ansible.builtin.include_role:
+        name: rootless_user
+      vars:
+        rootless_user_name: "{{ grafana_pcp_user }}"
+        rootless_user_group: "{{ grafana_pcp_group }}"
+        rootless_user_home: "{{ grafana_pcp_home }}"
+        rootless_user_comment: "Grafana PCP Service User"
+
+    - name: Set XDG_RUNTIME_DIR for grafana_pcp user
+      ansible.builtin.set_fact:
+        grafana_pcp_xdg_runtime_dir: "{{ rootless_user_xdg_runtime_dir }}"
 
   roles:
     - role: linux-system-roles.firewall
