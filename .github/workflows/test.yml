@@ -1,0 +1,92 @@
+---
+name: Test
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  ansible-lint:
+    name: Ansible Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          working_directory: ansible
+
+  integration:
+    name: Integration Tests
+    runs-on: self-hosted
+    needs: ansible-lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Ansible and test dependencies
+        run: |
+          pip install --upgrade ansible-core
+          pip install -r tests/requirements.txt
+          ansible-galaxy role install -r ansible/requirements.yml
+          ansible-galaxy collection install -r ansible/requirements.yml
+
+      - name: Write SSH key and config
+        run: |
+          mkdir -p .tmp
+          echo "${{ secrets.GRAFANA_PCP_SSH_KEY }}" > .tmp/id_rsa
+          chmod 600 .tmp/id_rsa
+          cat > .tmp/ssh-config <<EOF
+          Host grafana-pcp
+            HostName ${{ secrets.GRAFANA_PCP_HOST }}
+            User root
+            IdentityFile ${{ github.workspace }}/.tmp/id_rsa
+            StrictHostKeyChecking no
+          EOF
+
+      - name: Run playbook
+        env:
+          ANSIBLE_PRIVATE_KEY_FILE: .tmp/id_rsa
+        run: |
+          ansible-playbook \
+            -i "${{ secrets.GRAFANA_PCP_HOST }}," \
+            -e "pull_images_registry_username=${{ secrets.REGISTRY_USERNAME }}" \
+            -e "pull_images_registry_password=${{ secrets.REGISTRY_PASSWORD }}" \
+            ansible/grafana_pcp.yaml
+
+      - name: Run testinfra tests
+        run: |
+          cd tests && pytest -v
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: tests/report.xml
+        continue-on-error: true
+
+  test-suite:
+    if: always()
+    needs:
+      - ansible-lint
+      - integration
+    runs-on: ubuntu-latest
+    name: Test suite
+    steps:
+      - name: Decide whether all jobs succeeded
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
