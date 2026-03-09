@@ -1,0 +1,17 @@
+---
+grafana_pcp_user: grafana-pcp
+grafana_pcp_group: grafana-pcp
+grafana_pcp_home: "/var/lib/{{ grafana_pcp_user }}"
+
+# Which become method to use for rootless tasks.
+# 'sudo': needs XDG_RUNTIME_DIR passed explicitly via grafana_pcp_runtime_env
+# 'community.general.machinectl': full login session, XDG_RUNTIME_DIR auto-set
+grafana_pcp_become_method: sudo
+
+# Environment injected into every grafana_pcp become block.
+# Set to {} when using community.general.machinectl (XDG_RUNTIME_DIR is auto-set).
+# grafana_pcp_xdg_runtime_dir is set dynamically after the rootless_user role runs.
+grafana_pcp_runtime_env:
+  XDG_RUNTIME_DIR: "{{ grafana_pcp_xdg_runtime_dir }}"
+
+grafana_pcp_systemd_user_dir: "{{ grafana_pcp_home }}/.config/systemd/user"
