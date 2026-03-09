@@ -2,12 +2,12 @@
 
 - name: Login to the container registry
   containers.podman.podman_login:
-    registry: "{{ container_registry }}"
-    username: "{{ container_registry_username }}"
-    password: "{{ container_registry_password }}"
+    registry: "{{ pull_images_registry }}"
+    username: "{{ pull_images_registry_username }}"
+    password: "{{ pull_images_registry_password }}"
 
 - name: Pull container images
   containers.podman.podman_image:
     name: "{{ item }}"
-  loop: "{{ images }}"
+  loop: "{{ pull_images_images }}"
 ...
