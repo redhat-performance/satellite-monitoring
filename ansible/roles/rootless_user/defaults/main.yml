@@ -1,0 +1,16 @@
+---
+rootless_user_name: grafana-pcp
+rootless_user_group: grafana-pcp
+rootless_user_home: "/var/lib/{{ rootless_user_name }}"
+rootless_user_shell: /sbin/nologin
+rootless_user_comment: "Rootless Service User"
+
+# Subuid/subgid ranges for user namespaces
+rootless_user_subuid_start: 100000
+rootless_user_subuid_count: 65536
+rootless_user_subgid_start: 100000
+rootless_user_subgid_count: 65536
+
+# Lowest port rootless containers can bind to (Linux default: 1024).
+# Lower this to 80 if containers need to bind privileged ports.
+rootless_user_unprivileged_port_start: 1024
