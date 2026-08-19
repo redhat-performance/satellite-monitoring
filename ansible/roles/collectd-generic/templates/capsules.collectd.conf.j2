@@ -34,7 +34,7 @@ LoadPlugin uptime
   DeleteSocket true
 </Plugin>
 
-{% if sat_version != 'foremanctl' %}
+{% if sat_version is not defined or sat_version != 'foremanctl' %}
 LoadPlugin apache
 <Plugin apache>
     # Leave "Instance" blank unless you have multiple
@@ -77,13 +77,13 @@ LoadPlugin apache
   IgnoreSelected false
 </Plugin>
 
-{% if sat_version != 'foremanctl' %}
 <Plugin postgresql>
-  <Database pulpcore>
+  {# foremanctl names the Pulp database "pulp"; the RPM installer names it "pulpcore" #}
+  <Database {{ 'pulp' if (sat_version is defined and sat_version == 'foremanctl') else 'pulpcore' }}>
     Host "localhost"
     Port "5432"
     User "pulp"
-    Password "{{ capsule_pulp_password.stdout }}"
+    Password "{{ pulp_password.stdout }}"
     # Predefined:
     Query backends
     Query transactions
@@ -93,7 +93,6 @@ LoadPlugin apache
     Query disk_usage
   </Database>
 </Plugin>
-{% endif %}
 
 <Plugin processes>
   # Apache
