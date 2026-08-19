@@ -7,23 +7,20 @@ collectd_packages:
   graphite:
     - collectd
     - collectd-turbostat
-  satellite6-el8:
-    - collectd
-    - collectd-apache
-    - collectd-disk
-    - collectd-postgresql
-  satellite6-el9:
-    - collectd
-    - collectd-apache
-    - collectd-disk
-    - collectd-postgresql
   docker-hosts:
     - collectd
-  capsules-el8:
+  satellite6:
     - collectd
     - collectd-apache
     - collectd-disk
-  capsules-el9:
+    - collectd-postgresql
+  capsules:
     - collectd
     - collectd-apache
     - collectd-disk
+    - collectd-postgresql
+
+# Per-(config_type, EL major version) overrides, only needed when a specific
+# EL release's package set differs from collectd_packages[config_type] above
+# (e.g. a package not being available for that release in EPEL).
+collectd_packages_el_overrides: {}
