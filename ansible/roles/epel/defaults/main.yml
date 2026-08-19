@@ -1,0 +1,7 @@
+---
+epel_gpg_key_url: >-
+  https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{
+  ansible_facts['distribution_major_version'] }}
+epel_repo_url: >-
+  https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{
+  ansible_facts['distribution_major_version'] }}.noarch.rpm

@@ -1,0 +1,23 @@
+---
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Uninstall EPEL
+  when:
+    - "'epel-release' in ansible_facts.packages"
+  block:
+    # sometimes there's a stale epel package present, so rpm -e fails
+    # because somebody deleted the .repo files without uninstalling
+    # epel-release and rpm -e fails to remove multiple versions of the
+    # package. So we need to check this and remove all one by one
+    - name: Delete EPEL repo package
+      ansible.builtin.dnf:
+        name:
+          - epel-release
+        state: absent
+
+    - name: Disable EPEL
+      ansible.builtin.yum_repository:
+        name: epel
+        state: absent

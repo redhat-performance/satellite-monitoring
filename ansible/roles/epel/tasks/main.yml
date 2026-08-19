@@ -1,0 +1,6 @@
+---
+- name: Fail if included without tasks_from
+  ansible.builtin.fail:
+    msg: >-
+      The epel role has no default behavior; include it with
+      tasks_from: install or tasks_from: uninstall.

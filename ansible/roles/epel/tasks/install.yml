@@ -1,0 +1,53 @@
+---
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install EPEL
+  when:
+    - "'epel-release' not in ansible_facts.packages"
+  block:
+    - name: Import EPEL GPG key
+      ansible.builtin.rpm_key:
+        key: "{{ epel_gpg_key_url }}"
+        state: present
+      register: epel_gpg_key_result
+      until: epel_gpg_key_result is succeeded
+      retries: 5
+      delay: 10
+      when:
+        - ansible_facts['distribution_major_version'] | int < 10
+
+    # ansible.builtin.rpm_key shells out to the system gpg binary, which
+    # fails to parse the EL10 EPEL key's OpenPGP v6 packet format
+    # ("packet(6) with unknown version 6") - it's a newly-generated key for
+    # the new release, unlike EL8/EL9's older, still-v4-format keys. rpm
+    # --import uses RPM's own signature parsing instead, which handles it.
+    - name: Import EPEL GPG key
+      ansible.builtin.command:
+        cmd: "rpm --import {{ epel_gpg_key_url }}"
+      register: epel_gpg_key_result_el10
+      until: epel_gpg_key_result_el10 is succeeded
+      retries: 5
+      delay: 10
+      changed_when: true
+      when:
+        - ansible_facts['distribution_major_version'] | int >= 10
+
+    - name: Install EPEL repo package
+      ansible.builtin.dnf:
+        name: "{{ epel_repo_url }}"
+        state: present
+      register: epel_install_result
+      until: epel_install_result is succeeded
+      retries: 5
+      delay: 10
+
+    - name: Gather package facts again
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Assert 'epel-release' is installed
+      ansible.builtin.assert:
+        that:
+          - "'epel-release' in ansible_facts.packages"
