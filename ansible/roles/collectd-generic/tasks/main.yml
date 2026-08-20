@@ -184,7 +184,7 @@
 #   when: "config_type == 'ose'"
 
 - name: Configure collectd.conf
-  template:
+  ansible.builtin.template:
     src={{config_type}}.collectd.conf.j2
     dest=/etc/collectd.conf
     owner=root
@@ -205,6 +205,20 @@
   changed_when: false
 
 - name: Collectd SELinux customization
+  # Force the OS's own default python3 rather than Ansible's auto-discovered
+  # one. `community.general.selinux_permissive` needs the seobject module
+  # from policycoreutils-python-utils, which is only built against the
+  # platform's native python3 ABI. On hosts with a second, higher-numbered
+  # python3.X installed for unrelated reasons (e.g. foremanctl's
+  # python3.12-obsah dependency, or Satellite 6.19's own python3.12-aiohttp
+  # stack on RHEL 9), Ansible's auto/auto_silent discovery prefers that
+  # higher version over the system default, and it lacks seobject, causing
+  # "ModuleNotFoundError: No module named 'seobject'".
+  # /usr/bin/python3 always resolves to whatever the OS itself considers
+  # its default python3, so this is correct on both RHEL 9 (-> python3.9,
+  # has seobject) and RHEL 10 (-> python3.12, has seobject there too).
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   when:
     - "'collectd' in collectd_selinux_module.stdout_lines"
   block:
@@ -217,7 +231,7 @@
     # Additional policy bits may be needed for exec
     #
     - name: Collectd policy customization
-      copy:
+      ansible.builtin.copy:
         src=custom-collectd.pp
         dest=/root/custom-collectd.pp
         owner=root
