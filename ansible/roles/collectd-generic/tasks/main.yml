@@ -254,6 +254,38 @@
 - name: Add collectd group
   group: name=collectd state=present
 
+# collectd's postgresql plugin holds persistent connections that need to
+# stop with postgresql.service. Both satellite6 and capsules run a local
+# instance, RPM and foremanctl alike - same condition as the Pulp
+# password lookup above.
+- name: Tie collectd to PostgreSQL's lifecycle
+  when:
+    - config_type in ['satellite6', 'capsules']
+  block:
+    - name: Create collectd systemd override directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/collectd.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Configure collectd/PostgreSQL systemd dependency
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/collectd.service.d/postgresql-dependency.conf
+        content: |
+          [Unit]
+          After=postgresql.service
+          Wants=postgresql.service
+          PartOf=postgresql.service
+        mode: '0644'
+      register: _collectd_postgresql_dependency
+
+    # A handler would defer this until end-of-play, after "Setup collectd
+    # service" below has already restarted it against the stale unit config.
+    - name: Reload systemd daemon  # noqa: no-handler
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: _collectd_postgresql_dependency is changed
+
 # Start collectd service
 - name: Setup collectd service
   service: name=collectd state=restarted enabled=true
