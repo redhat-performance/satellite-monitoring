@@ -36,63 +36,48 @@
         apr httpd libnghttp2 mod_ssl \
         openssl-libs \
         postgresql-server \
-        python3.11 \
-        redis \
+        {{ 'python3.12' if ansible_facts['distribution_major_version'] | int >= 10 else 'python3.11' }} \
+        {{ 'valkey' if ansible_facts['distribution_major_version'] | int >= 10 else 'redis' }} \
         ruby-libs \
         libxcrypt tcl-devel zlib-devel
 
-- name: Gather package facts
-  ansible.builtin.package_facts:
-    manager: auto
-
 - name: Install EPEL
-  when:
-    - "'epel-release' not in ansible_facts.packages"
-  block:
-    - name: Get EPEL repo if not already there
-      get_url:
-        url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
-        dest: /root/epel-release.rpm
+  ansible.builtin.include_role:
+    name: epel
+    tasks_from: install
 
-    - name: Install EPEL rpm if not already done
-      ansible.builtin.command:
-        cmd: |
-          rpm -ivh --force /root/epel-release.rpm
-      when:
-        - "'epel-release' not in ansible_facts.packages"
-
-    - name: Gather package facts again
-      ansible.builtin.package_facts:
-        manager: auto
-
-    - name: Assert 'epel-release' is installed
-      ansible.builtin.assert:
-        that:
-          - "'epel-release' in ansible_facts.packages"
-
+# Not yet packaged for EPEL 10 (genuinely absent, not just renamed).
 - name: Install flamegraph package from EPEL
+  when:
+    - ansible_facts['distribution_major_version'] | int < 10
   ansible.builtin.dnf:
     name:
       - flamegraph
 
-- name: Uninstall EPEL
+# EPEL 10 doesn't package flamegraph yet, so vendor the upstream project
+# directly instead (pure Perl, no compilation) - keeps flamegraph.pl
+# resolving on $PATH exactly like the EPEL-installed version does on
+# EL9, so bpf_convert.yaml needs no changes on either OS version.
+- name: Vendor FlameGraph from upstream
   when:
-    - "'epel-release' in ansible_facts.packages"
+    - ansible_facts['distribution_major_version'] | int >= 10
   block:
-    # sometimes there's a stale epel package present, so rpm -e fails
-    # because somebody deleted the .repo files without uninstalling
-    # epel-release and rpm -e fails to remove multiple versions of the
-    # package. So we need to check this and remove all one by one
-    - name: Delete EPEL repo package
-      ansible.builtin.dnf:
-        name:
-          - epel-release
-        state: absent
+    - name: Clone FlameGraph
+      ansible.builtin.git:
+        repo: https://github.com/brendangregg/FlameGraph.git
+        dest: /opt/FlameGraph
+        version: master
 
-    - name: Disable EPEL
-      yum_repository:
-        name: epel
-        state: absent
+    - name: Symlink flamegraph.pl onto PATH
+      ansible.builtin.file:
+        src: /opt/FlameGraph/flamegraph.pl
+        dest: /usr/local/bin/flamegraph.pl
+        state: link
+
+- name: Uninstall EPEL
+  ansible.builtin.include_role:
+    name: epel
+    tasks_from: uninstall
 
 # Until `ansible.builtin.dnf` supports natively `debuginfo-install`
 - name: Re-enable Foreman protector lock
