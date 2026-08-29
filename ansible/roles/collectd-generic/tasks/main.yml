@@ -279,12 +279,34 @@
         mode: '0644'
       register: _collectd_postgresql_dependency
 
+    # PartOf= only propagates postgresql.service's stops to collectd, not its
+    # starts - a mid-life postgresql restart (e.g. during installer tuning)
+    # leaves collectd stopped indefinitely with no automatic recovery. Close
+    # the loop from the other side: have postgresql.service explicitly bring
+    # collectd back up once it finishes (re)starting.
+    - name: Create postgresql systemd override directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/postgresql.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Configure PostgreSQL/collectd restart trigger
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/postgresql.service.d/collectd-restart.conf
+        content: |
+          [Service]
+          ExecStartPost=-/usr/bin/systemctl --no-block start collectd.service
+        mode: '0644'
+      register: _postgresql_collectd_restart_trigger
+
     # A handler would defer this until end-of-play, after "Setup collectd
     # service" below has already restarted it against the stale unit config.
     - name: Reload systemd daemon  # noqa: no-handler
       ansible.builtin.systemd:
         daemon_reload: true
-      when: _collectd_postgresql_dependency is changed
+      when: >-
+        _collectd_postgresql_dependency is changed or
+        _postgresql_collectd_restart_trigger is changed
 
 # Start collectd service
 - name: Setup collectd service
