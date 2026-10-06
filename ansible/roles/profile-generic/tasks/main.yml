@@ -3,19 +3,16 @@
 # Install profiling packages (Generic)
 #
 
-- name: Assert ansible_facts['distribution_major_version']
-  ansible.builtin.assert:
-    that:
-      - ansible_facts['distribution_major_version'] is defined
+- name: Detect deployment method on this host
+  ansible.builtin.include_tasks: deployment_method/detect.yaml
 
 # Until `ansible.builtin.dnf` supports natively `debuginfo-install`
 - name: Disable Foreman protector lock
+  when:
+    - _deployer == 'satellite-installer'
   ansible.builtin.command:
     cmd: |
-      foreman-maintain packages unlock
-  when:
-    - product is not defined or
-      ( product == 'satellite' and sat_version is defined and sat_version != 'foremanctl' )
+      satellite-maintain packages unlock
 
 - name: Install bcc-tools, perf and js-d3-flame-graph packages
   ansible.builtin.dnf:
@@ -81,10 +78,9 @@
 
 # Until `ansible.builtin.dnf` supports natively `debuginfo-install`
 - name: Re-enable Foreman protector lock
+  when:
+    - _deployer == 'satellite-installer'
   ansible.builtin.command:
     cmd: |
-      foreman-maintain packages lock
-  when:
-    - product is not defined or
-      ( product == 'satellite' and sat_version is defined and sat_version != 'foremanctl' )
+      satellite-maintain packages lock
 ...

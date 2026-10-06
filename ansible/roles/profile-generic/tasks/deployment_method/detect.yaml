@@ -1,0 +1,46 @@
+---
+# Vendored from satperf's playbooks/satellite/tasks/deployment_method/detect.yaml
+# (commit 8ea70193a9ca) - kept self-contained here rather than reaching across
+# repos via a relative path, since nothing pins that path to a specific
+# satperf checkout/version.
+#
+# Detect _deployer and _deployment_method from installed packages on this host.
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+
+- name: Determine installed deployer/installer package
+  # satellitectl depends on (and installs alongside) foremanctl, and
+  # satellite-installer likewise wraps foreman-installer, so a Satellite
+  # host has both of its pair installed at once - list from most to least
+  # product-specific and take the first match, rather than requiring
+  # exactly one to be present.  RPM proxies ship satellite-capsule or
+  # foreman-proxy-content instead of the server installer packages; map
+  # those to their server-side equivalents for derived facts.
+  vars:
+    _deployment_method_packages: "{{ ansible_facts.packages }}"
+  ansible.builtin.set_fact:
+    _deployer: >-
+      {{ 'satellitectl' if 'satellitectl' in _deployment_method_packages
+         else 'satellite-installer' if 'satellite-installer' in _deployment_method_packages
+         else 'foremanctl' if 'foremanctl' in _deployment_method_packages
+         else 'foreman-installer' if 'foreman-installer' in _deployment_method_packages
+         else 'satellite-installer' if 'satellite-capsule' in _deployment_method_packages
+         else 'foreman-installer' if 'foreman-proxy-content' in _deployment_method_packages
+         else none }}
+    _deployment_method: >-
+      {{ 'container'
+         if ('satellitectl' in _deployment_method_packages
+             or 'foremanctl' in _deployment_method_packages)
+         else 'rpm' }}
+
+- name: Assert a known deployer/installer package is installed
+  ansible.builtin.assert:
+    that:
+      - _deployer is not none
+    fail_msg: >-
+      Expected one of satellitectl/satellite-installer/foremanctl/foreman-installer/
+      satellite-capsule/foreman-proxy-content to be installed on
+      {{ inventory_hostname }}, found none of those among installed packages.
+
+- name: Set derived deployment facts
+  ansible.builtin.include_tasks: set_derived_facts.yaml
