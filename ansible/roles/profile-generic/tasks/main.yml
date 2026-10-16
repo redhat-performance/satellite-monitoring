@@ -1,18 +1,8 @@
 ---
-#
-# Install profiling packages (Generic)
-#
-
-- name: Detect deployment method on this host
-  ansible.builtin.include_tasks: deployment_method/detect.yaml
-
-# Until `ansible.builtin.dnf` supports natively `debuginfo-install`
-- name: Disable Foreman protector lock
-  when:
-    - _deployer == 'satellite-installer'
-  ansible.builtin.command:
-    cmd: |
-      satellite-maintain packages unlock
+# Install profiling packages pre-deploy, while the debug/source repos are still
+# reachable (a Satellite-served capsule later has only OS+deployer+containers).
+# -debuginfo is installed directly (not `debuginfo-install`, which no-ops on
+# not-yet-installed packages); versions may skew slightly from deployed binaries.
 
 - name: Install bcc-tools, perf and js-d3-flame-graph packages
   ansible.builtin.dnf:
@@ -21,22 +11,35 @@
       - perf
       - js-d3-flame-graph
 
-# Until `ansible.builtin.dnf` supports natively `debuginfo-install`
+- name: Build the debug package list
+  ansible.builtin.set_fact:
+    _profile_debug_packages:
+      - apr
+      - httpd
+      - libnghttp2
+      - mod_ssl
+      - openssl-libs
+      - postgresql-server
+      - "{{ 'python3.12' if ansible_facts['distribution_major_version'] | int >= 10 else 'python3.11' }}"
+      - "{{ 'valkey' if ansible_facts['distribution_major_version'] | int >= 10 else 'redis' }}"
+      - ruby-libs
+      - libxcrypt
+      # Runtime packages, not their header-only -devel (which have no -debuginfo).
+      - tcl
+      - "{{ 'zlib-ng-compat' if ansible_facts['distribution_major_version'] | int >= 10 else 'zlib' }}"
+
+# Until `ansible.builtin.dnf` supports natively installing debuginfo
 - name: Install required debug packages
   ansible.builtin.shell:
     cmd: |
-      dnf debuginfo-install -y \
-        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-debug-rpms \
-        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-source-rpms \
-        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-debug-rpms \
-        --enablerepo rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-source-rpms \
-        apr httpd libnghttp2 mod_ssl \
-        openssl-libs \
-        postgresql-server \
-        {{ 'python3.12' if ansible_facts['distribution_major_version'] | int >= 10 else 'python3.11' }} \
-        {{ 'valkey' if ansible_facts['distribution_major_version'] | int >= 10 else 'redis' }} \
-        ruby-libs \
-        libxcrypt tcl-devel zlib-devel
+      dnf install -y \
+        --enablerepo {{ baseos_debug_repo_name }} \
+        --enablerepo {{ baseos_source_repo_name }} \
+        --enablerepo {{ appstream_debug_repo_name }} \
+        --enablerepo {{ appstream_source_repo_name }} \
+        {{ _profile_debug_packages | map('regex_replace', '$', '-debuginfo') | join(' ') }}
+  register: _profile_debuginfo
+  changed_when: "'Installed:' in _profile_debuginfo.stdout"
 
 - name: Install EPEL
   ansible.builtin.include_role:
@@ -75,12 +78,4 @@
   ansible.builtin.include_role:
     name: epel
     tasks_from: uninstall
-
-# Until `ansible.builtin.dnf` supports natively `debuginfo-install`
-- name: Re-enable Foreman protector lock
-  when:
-    - _deployer == 'satellite-installer'
-  ansible.builtin.command:
-    cmd: |
-      satellite-maintain packages lock
 ...

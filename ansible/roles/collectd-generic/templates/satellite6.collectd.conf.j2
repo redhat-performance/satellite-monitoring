@@ -2,7 +2,9 @@
 # Config type: {{config_type}}
 
 #Extract the candlepin password
+{% if collectd_config_profile | default('full') == 'full' %}
 {% set candlepin_password = satellite_candlepin_password.stdout.split('=') %}
+{% endif %}
 
 # Interval default is 10s
 Interval {{collectd_interval|default('10')}}
@@ -25,7 +27,9 @@ LoadPlugin memory
 LoadPlugin network
 LoadPlugin numa
 LoadPlugin processes
+{% if collectd_config_profile | default('full') == 'full' %}
 LoadPlugin postgresql
+{% endif %}
 LoadPlugin statsd
 LoadPlugin swap
 LoadPlugin unixsock
@@ -54,7 +58,7 @@ LoadPlugin uptime
 </Plugin>
 {% endif %}
 
-{% if sat_version is not defined or sat_version != 'foremanctl' %}
+{% if (collectd_config_profile | default('full') == 'full') and (sat_version is not defined or sat_version != 'foremanctl') %}
 LoadPlugin apache
 <Plugin apache>
     # Leave "Instance" blank unless you have multiple
@@ -96,6 +100,7 @@ LoadPlugin apache
   IgnoreSelected false
 </Plugin>
 
+{% if collectd_config_profile | default('full') == 'full' %}
 <Plugin postgresql>
   <Database candlepin>
     Host "localhost"
@@ -138,6 +143,7 @@ LoadPlugin apache
     Query disk_usage
   </Database>
 </Plugin>
+{% endif %}
 
 <Plugin processes>
   # Apache

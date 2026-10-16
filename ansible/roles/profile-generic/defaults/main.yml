@@ -1,0 +1,9 @@
+---
+baseos_debug_repo_name: >-
+  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-debug-rpms
+baseos_source_repo_name: >-
+  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-source-rpms
+appstream_debug_repo_name: >-
+  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-debug-rpms
+appstream_source_repo_name: >-
+  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-source-rpms

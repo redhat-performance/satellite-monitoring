@@ -1,0 +1,118 @@
+---
+# Install concern: package/repo setup that must run pre-deploy, while EPEL/CRB
+# are reachable (a Satellite-served capsule later has only OS+deployer+containers).
+
+- name: Install EPEL
+  ansible.builtin.include_role:
+    name: epel
+    tasks_from: install
+
+# RHEL 10.1+ split EPEL-only SELinux policy modules (e.g. collectd's) out of
+# the base selinux-policy package into "-extra" subpackages shipped via CRB.
+# RHEL 8/9 never needed this - their EPEL policy modules ship in the base
+# selinux-policy package directly.
+- name: Enable CodeReady Builder for EPEL SELinux policy modules (EL10+)
+  when:
+    - ansible_facts['distribution_major_version'] | int >= 10
+  block:
+    - name: Enable CRB repository
+      community.general.rhsm_repository:
+        name: "{{ crb_repo_name }}"
+        state: enabled
+
+    - name: Install SELinux policy extra module (provides collectd_t, etc.)
+      ansible.builtin.dnf:
+        name: selinux-policy-targeted-extra
+        state: present
+
+    # CRB is only needed for the install above; disable it immediately
+    # rather than leaving it enabled for the rest of the role, same
+    # reasoning as EPEL.
+    - name: Disable CRB repository
+      community.general.rhsm_repository:
+        name: "{{ crb_repo_name }}"
+        state: disabled
+
+- name: Install collectd related packages from EPEL
+  vars:
+    collectd_packages_key: >-
+      {{ config_type }}-el{{ ansible_facts['distribution_major_version'] }}
+  ansible.builtin.dnf:
+    name: >-
+      {{ collectd_packages_el_overrides[collectd_packages_key]
+         | default(collectd_packages[config_type]) }}
+
+# EPEL is only needed for the package install above; remove it immediately
+# rather than holding it for the rest of the role (satellite config,
+# templating, selinux, service management).
+- name: Uninstall EPEL
+  ansible.builtin.include_role:
+    name: epel
+    tasks_from: uninstall
+
+# Configure selinux bits
+#
+# Both steps below only apply when collectd's own SELinux policy module
+# (defining collectd_t) is actually present. It always is on EL8/EL9; on
+# EL10 it requires the CRB-provided selinux-policy-targeted-extra package
+# installed above, which can still be absent (e.g. no valid subscription
+# entitlement for CRB) - skip gracefully rather than fail in that case.
+- name: Check for a collectd SELinux policy module
+  ansible.builtin.command:
+    cmd: semodule -l
+  register: collectd_selinux_module
+  changed_when: false
+
+- name: Collectd SELinux customization
+  # Force the OS's own default python3 rather than Ansible's auto-discovered
+  # one. `community.general.selinux_permissive` needs the seobject module
+  # from policycoreutils-python-utils, which is only built against the
+  # platform's native python3 ABI. On hosts with a second, higher-numbered
+  # python3.X installed for unrelated reasons (e.g. foremanctl's
+  # python3.12-obsah dependency, or Satellite 6.19's own python3.12-aiohttp
+  # stack on RHEL 9), Ansible's auto/auto_silent discovery prefers that
+  # higher version over the system default, and it lacks seobject, causing
+  # "ModuleNotFoundError: No module named 'seobject'".
+  # /usr/bin/python3 always resolves to whatever the OS itself considers
+  # its default python3, so this is correct on both RHEL 9 (-> python3.9,
+  # has seobject) and RHEL 10 (-> python3.12, has seobject there too).
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  when:
+    - "'collectd' in collectd_selinux_module.stdout_lines"
+  block:
+    - name: Set permissive for collectd
+      community.general.selinux_permissive:
+        name: collectd_t
+        permissive: true
+
+    #
+    # Additional policy bits may be needed for exec
+    #
+    - name: Collectd policy customization
+      ansible.builtin.copy:
+        src: custom-collectd.pp
+        dest: /root/custom-collectd.pp
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Check for collectd custom policy
+      ansible.builtin.command:
+        cmd: semodule -l
+      register: collectd_custom
+      changed_when: false
+
+    - name: Set custom policy for collectd
+      ansible.builtin.command:
+        cmd: semodule -i /root/custom-collectd.pp
+      when:
+        - "'custom-collectd' not in collectd_custom.stdout_lines"
+      changed_when: true
+
+# add collectd default group (not added with rpm -ivh)
+- name: Add collectd group
+  ansible.builtin.group:
+    name: collectd
+    state: present
+...

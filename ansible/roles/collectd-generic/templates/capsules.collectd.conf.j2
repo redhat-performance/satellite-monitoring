@@ -34,7 +34,7 @@ LoadPlugin uptime
   DeleteSocket true
 </Plugin>
 
-{% if sat_version is not defined or sat_version != 'foremanctl' %}
+{% if (collectd_config_profile | default('full') == 'full') and (sat_version is not defined or sat_version != 'foremanctl') %}
 LoadPlugin apache
 <Plugin apache>
     # Leave "Instance" blank unless you have multiple
@@ -77,6 +77,7 @@ LoadPlugin apache
   IgnoreSelected false
 </Plugin>
 
+{% if collectd_config_profile | default('full') == 'full' %}
 <Plugin postgresql>
   {# foremanctl names the Pulp database "pulp"; the RPM installer names it "pulpcore" #}
   <Database {{ 'pulp' if (sat_version is defined and sat_version == 'foremanctl') else 'pulpcore' }}>
@@ -93,6 +94,7 @@ LoadPlugin apache
     Query disk_usage
   </Database>
 </Plugin>
+{% endif %}
 
 <Plugin processes>
   # Apache

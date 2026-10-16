@@ -1,0 +1,140 @@
+---
+# Configure concern: render collectd.conf + (re)start collectd; installs nothing
+# (safe post-deploy). profile basic = OS plugins only; full = + apache/postgresql
+# (needs the running services' DB passwords).
+
+- name: Resolve deployment method for full config
+  # rpm vs container drives where the DB passwords are read from; prefer the
+  # caller-provided value, else detect.
+  when:
+    - collectd_config_profile | default('full') == 'full'
+    - _deployment_method is not defined
+  block:
+    - name: Detect deployment method on this host
+      ansible.builtin.include_tasks: "{{ _deployment_method_tasks_dir }}/detect.yaml"
+      when: config_type == 'satellite6'
+
+    - name: Inherit deployment method from Satellite
+      ansible.builtin.include_tasks: "{{ _deployment_method_tasks_dir }}/inherit.yaml"
+      when: config_type == 'capsules'
+
+- name: Satellite specific configuration steps
+  when:
+    - collectd_config_profile | default('full') == 'full'
+    - config_type == 'satellite6'
+  block:
+    - name: RPM
+      when:
+        - _deployment_method == 'rpm'
+      block:
+        #
+        # Enable mod_status (RPM Apache installs only; foremanctl's reverse-proxy
+        # vhost already has mod_status enabled by default)
+        #
+        - name: Enable mod_status
+          ansible.builtin.command:
+            cmd: |
+              foreman-installer --enable-apache-mod-status
+          changed_when: true
+
+        - name: Get Candlepin PostgreSQL Password
+          ansible.builtin.command:
+            cmd: |
+              grep 'jpa.config.hibernate.connection.password' /etc/candlepin/candlepin.conf
+          register: satellite_candlepin_password
+          changed_when: false
+
+        - name: Get Foreman PostgreSQL Password
+          ansible.builtin.shell:
+            cmd: |
+              set -o pipefail
+              grep 'password' /etc/foreman/database.yml | awk -F'"' '{print $2}'
+          register: satellite_foreman_password
+          changed_when: false
+
+    - name: Container
+      when:
+        - _deployment_method == 'container'
+      block:
+        - name: Get Candlepin PostgreSQL config secret
+          containers.podman.podman_secret_info:
+            name: candlepin-candlepin-conf
+            showsecret: true
+          register: _candlepin_conf_secret
+
+        - name: Get Foreman database URL secret
+          containers.podman.podman_secret_info:
+            name: foreman-database-url
+            showsecret: true
+          register: _foreman_database_url_secret
+
+        - name: Set PostgreSQL password facts from foremanctl secrets
+          vars:
+            candlepin_password_regex: >-
+              jpa\.config\.hibernate\.connection\.password=[^\n]*
+            foreman_database_url_regex: '^[a-zA-Z]+://[^:]+:([^@]+)@.*$'
+          ansible.builtin.set_fact:
+            # Shaped like a command/shell registration result (.stdout)
+            # so collectd.conf.j2 needs no RPM/foremanctl branching.
+            satellite_candlepin_password:
+              stdout: >-
+                {{ _candlepin_conf_secret.secrets[0].SecretData
+                   | regex_search(candlepin_password_regex) }}
+            satellite_foreman_password:
+              stdout: >-
+                {{ _foreman_database_url_secret.secrets[0].SecretData
+                   | regex_replace(foreman_database_url_regex, '\1') }}
+
+
+- name: Common collectd configuration
+  when:
+    - collectd_config_profile | default('full') == 'full'
+    - config_type in ['satellite6', 'capsules']
+  block:
+    # Pulp/pulpcore runs on both satellite and capsules, using the identical
+    # credential regardless of config_type, so it's fetched once here rather
+    # than duplicated in both config_type-specific blocks below.
+    - name: RPM
+      when:
+        - _deployment_method == 'rpm'
+      block:
+        - name: Get Pulp PostgreSQL password
+          ansible.builtin.shell:
+            cmd: |
+              set -o pipefail
+              grep -i 'password' /etc/pulp/settings.py | awk -F'"' '{print $2}'
+          register: pulp_password
+          changed_when: false
+
+    - name: Container
+      when:
+        - _deployment_method == 'container'
+      block:
+        - name: Get Pulp PostgreSQL password secret
+          containers.podman.podman_secret_info:
+            name: pulp-db-password
+            showsecret: true
+          register: _pulp_db_secret
+
+        - name: Set pulp PostgreSQL password fact from foremanctl secret
+          ansible.builtin.set_fact:
+            # Shaped like a command/shell registration result (.stdout)
+            # so collectd.conf.j2 needs no RPM/foremanctl branching.
+            pulp_password:
+              stdout: "{{ _pulp_db_secret.secrets[0].SecretData }}"
+
+- name: Configure collectd.conf
+  ansible.builtin.template:
+    src: "{{ config_type }}.collectd.conf.j2"
+    dest: /etc/collectd.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+# Start collectd service
+- name: Setup collectd service
+  ansible.builtin.service:
+    name: collectd
+    state: restarted
+    enabled: true
+...

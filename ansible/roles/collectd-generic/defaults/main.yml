@@ -1,0 +1,7 @@
+---
+# GA default; a beta environment overrides this from the inventory
+# ([satellite6:vars]/[capsules:vars]) with the -beta- CRB repo id. Keep it a
+# role default (lowest precedence) so that inventory override can win.
+crb_repo_name: >-
+  codeready-builder-for-rhel-{{ ansible_facts['distribution_major_version'] }}-x86_64-rpms
+...
