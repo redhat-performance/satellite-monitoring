@@ -19,6 +19,9 @@
       community.general.rhsm_repository:
         name: "{{ crb_repo_name }}"
         state: enabled
+      # os_development hosts get CRB from the local compose-crb repo (already
+      # enabled by configure_development_repos), not from subscription-manager.
+      when: not (os_development | default(false) | bool)
 
     - name: Install SELinux policy extra module (provides collectd_t, etc.)
       ansible.builtin.dnf:
@@ -32,6 +35,7 @@
       community.general.rhsm_repository:
         name: "{{ crb_repo_name }}"
         state: disabled
+      when: not (os_development | default(false) | bool)
 
 - name: Install collectd related packages from EPEL
   vars:

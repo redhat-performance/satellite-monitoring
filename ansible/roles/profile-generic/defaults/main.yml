@@ -1,9 +1,16 @@
 ---
+# On os_development runs these resolve to the development-compose stanza ids
+# written by playbooks/common/tasks/configure_development_repos.yaml; otherwise
+# the GA RHSM repo names.
 baseos_debug_repo_name: >-
-  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-debug-rpms
+  {{ 'compose-baseos-debug' if (os_development | default(false) | bool)
+     else 'rhel-' ~ ansible_facts['distribution_major_version'] ~ '-for-x86_64-baseos-debug-rpms' }}
 baseos_source_repo_name: >-
-  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-baseos-source-rpms
+  {{ 'compose-baseos-source' if (os_development | default(false) | bool)
+     else 'rhel-' ~ ansible_facts['distribution_major_version'] ~ '-for-x86_64-baseos-source-rpms' }}
 appstream_debug_repo_name: >-
-  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-debug-rpms
+  {{ 'compose-appstream-debug' if (os_development | default(false) | bool)
+     else 'rhel-' ~ ansible_facts['distribution_major_version'] ~ '-for-x86_64-appstream-debug-rpms' }}
 appstream_source_repo_name: >-
-  rhel-{{ ansible_facts['distribution_major_version'] }}-for-x86_64-appstream-source-rpms
+  {{ 'compose-appstream-source' if (os_development | default(false) | bool)
+     else 'rhel-' ~ ansible_facts['distribution_major_version'] ~ '-for-x86_64-appstream-source-rpms' }}
